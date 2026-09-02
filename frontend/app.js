@@ -211,12 +211,11 @@ function renderTargets() {
   list.innerHTML = state.targets.map(t => `
     <div class="target-item ${t.target_ip === state.activeTargetIP ? 'active' : ''}"
          onclick="selectTarget('${t.target_ip}', ${t.target_port})">
-      <span class="target-os-icon">${t.os === 'Windows' ? '🪟' : t.os === 'Linux' ? '🐧' : '💻'}</span>
       <div class="target-info">
         <div class="target-name">${t.target_name || t.target_ip}</div>
-        <div class="target-ip">${t.target_ip}:${t.target_port} · ${t.os || 'Unknown'}</div>
+        <div class="target-ip">${t.target_ip}:${t.target_port} &middot; ${t.os || 'Unknown'}</div>
       </div>
-      <span class="target-status ${t.status}"></span>
+      <span class="status-dot ${t.status === 'online' ? 'online' : 'offline'}"></span>
     </div>
   `).join('');
 }
@@ -389,7 +388,7 @@ function renderResults(data, command) {
   // Evidence hash
   if (data.evidence_hash) {
     html += `<div class="evidence-hash-badge">
-      🔐 SHA-256: ${data.evidence_hash}
+      <span>SHA-256</span> <span>${data.evidence_hash}</span>
     </div>`;
   }
 

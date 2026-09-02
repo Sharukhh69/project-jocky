@@ -1,0 +1,40 @@
+/* Lucide / Shadcn Monochrome Icons (SVG) */
+.lucide {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.lucide-lg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
+}
+.lucide-sm {
+  width: 12px;
+  height: 12px;
+  stroke-width: 1.6;
+}
+
+/* Shadcn Monochrome System Tokens */
+:root {
+  --bg-primary: #09090b;       /* Zinc 950 */
+  --bg-card: #18181b;          /* Zinc 900 */
+  --bg-subtle: #27272a;        /* Zinc 800 */
+  --border-color: #27272a;     /* Zinc 800 */
+  --border-muted: #3f3f46;     /* Zinc 700 */
+  --text-primary: #fafafa;     /* Zinc 50 */
+  --text-secondary: #a1a1aa;   /* Zinc 400 */
+  --text-muted: #71717a;       /* Zinc 500 */
+  --accent-primary: #ffffff;   /* Pure White */
+  --accent-hover: #e4e4e7;     /* Zinc 200 */
+  --danger-color: #ef4444;     /* Red 500 */
+  --success-color: #22c55e;    /* Green 500 */
+  --status-active: #ffffff;
+}

@@ -1,198 +1,273 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>JOCKY — Forensic Command Interface</title>
-  <meta name="description" content="JOCKY Forensic Framework — Central Management Interface for Computer & Network Forensic Analysis" />
+  <title>JOCKY &mdash; Digital Forensic Framework</title>
+  <meta name="description" content="JOCKY Forensic Framework — Management Interface for Computer & Network Forensic Analysis" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="icons.css" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
-<!-- ── LOADING SCREEN ──────────────────────────────────────────────────────── -->
+<!-- SVG Defs for Reusable Lucide Monochrome Icons -->
+<svg style="display:none;" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Terminal -->
+    <g id="icon-terminal"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></g>
+    <!-- Network -->
+    <g id="icon-network"><rect x="2" y="2" width="6" height="6" rx="1"></rect><rect x="16" y="2" width="6" height="6" rx="1"></rect><rect x="9" y="16" width="6" height="6" rx="1"></rect><path d="M5 8v3a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"></path><line x1="12" y1="12" x2="12" y2="16"></line></g>
+    <!-- Shield -->
+    <g id="icon-shield"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></g>
+    <!-- Cpu / Process -->
+    <g id="icon-cpu"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="15" x2="23" y2="15"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="15" x2="4" y2="15"></line></g>
+    <!-- Usb -->
+    <g id="icon-usb"><circle cx="10" cy="7" r="1"></circle><circle cx="4" cy="20" r="1"></circle><path d="M4.7 19.3 19 5"></path><path d="m21 3-3 1 2 2Z"></path><path d="M9.26 7.68 5 12l2 5"></path><path d="m10 14 5 2 3.5-3.5"></path><circle cx="18" cy="12" r="1"></circle></g>
+    <!-- User / Auth -->
+    <g id="icon-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></g>
+    <!-- Laptop / System -->
+    <g id="icon-laptop"><rect x="3" y="4" width="18" height="12" rx="2"></rect><line x1="2" y1="20" x2="22" y2="20"></line></g>
+    <!-- Database / Registry -->
+    <g id="icon-database"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></g>
+    <!-- File -->
+    <g id="icon-file"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></g>
+    <!-- Play -->
+    <g id="icon-play"><polygon points="5 3 19 12 5 21 5 3"></polygon></g>
+    <!-- Trash / Clear -->
+    <g id="icon-trash"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></g>
+    <!-- Cloud -->
+    <g id="icon-cloud"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path></g>
+    <!-- Zap / Lightning -->
+    <g id="icon-zap"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></g>
+    <!-- Lock -->
+    <g id="icon-lock"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></g>
+    <!-- Unlock -->
+    <g id="icon-unlock"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></g>
+    <!-- Code / Compiler -->
+    <g id="icon-code"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></g>
+    <!-- Plus -->
+    <g id="icon-plus"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></g>
+    <!-- Download -->
+    <g id="icon-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></g>
+    <!-- Check -->
+    <g id="icon-check"><polyline points="20 6 9 17 4 12"></polyline></g>
+    <!-- X / Close -->
+    <g id="icon-close"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></g>
+    <!-- Search -->
+    <g id="icon-search"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></g>
+    <!-- Git Branch / Polymorphic -->
+    <g id="icon-branch"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></g>
+  </defs>
+</svg>
+
+<!-- Loader Screen -->
 <div id="loader" class="loader-screen">
   <div class="loader-content">
     <div class="loader-logo">JOCKY</div>
-    <div class="loader-subtitle">FORENSIC FRAMEWORK v1.0.0</div>
+    <div class="loader-subtitle">DIGITAL FORENSIC PLATFORM &middot; SIH 2026</div>
     <div class="loader-bar-wrap">
       <div class="loader-bar" id="loaderBar"></div>
     </div>
-    <div class="loader-status" id="loaderStatus">Initializing stealth engine...</div>
+    <div class="loader-status" id="loaderStatus">Initializing components...</div>
   </div>
 </div>
 
-<!-- ── MAIN APP ───────────────────────────────────────────────────────────── -->
+<!-- Main Application -->
 <div id="app" class="app hidden">
 
-  <!-- ── TOP NAVIGATION ──────────────────────────────────────────────────── -->
+  <!-- Top Navigation (Shadcn Header) -->
   <header class="topnav">
     <div class="topnav-left">
       <div class="logo">
-        <span class="logo-j">J</span><span class="logo-rest">OCKY</span>
-        <span class="logo-tag">FORENSIC</span>
+        <div class="logo-icon">J</div>
+        <span>JOCKY</span>
+        <span class="logo-tag">FORENSICS</span>
       </div>
     </div>
+
     <div class="topnav-center">
       <div class="server-status" id="serverStatusBadge">
         <span class="status-dot" id="serverDot"></span>
         <span id="serverStatusText">Connecting...</span>
       </div>
     </div>
+
     <div class="topnav-right">
-      <div class="nav-info">
-        <span class="nav-time" id="clock"></span>
-        <span class="nav-case" id="activeCaseBadge">No Case Selected</span>
-      </div>
-      <button class="btn btn-outline" id="btnNewCase">+ New Case</button>
+      <span class="nav-time" id="clock">--:--:--</span>
+      <span class="nav-case" id="activeCaseBadge">No Case Selected</span>
+      <button class="btn btn-outline btn-sm" id="btnNewCase">
+        <svg class="lucide lucide-sm"><use href="#icon-plus"></use></svg>
+        <span>New Case</span>
+      </button>
     </div>
   </header>
 
-  <!-- ── MAIN LAYOUT ─────────────────────────────────────────────────────── -->
+  <!-- Main Grid Layout -->
   <div class="layout">
 
-    <!-- ── LEFT SIDEBAR ──────────────────────────────────────────────────── -->
+    <!-- Left Sidebar -->
     <aside class="sidebar">
 
-      <!-- Case Selector -->
+      <!-- Case Selection -->
       <div class="sidebar-block">
-        <div class="sidebar-label">ACTIVE CASE</div>
+        <div class="sidebar-label">Active Investigation</div>
         <select id="caseSelect" class="select-input">
-          <option value="">— Select Case —</option>
+          <option value="">&mdash; Select Case &mdash;</option>
         </select>
       </div>
 
-      <!-- Targets -->
+      <!-- Target Endpoints -->
       <div class="sidebar-block">
         <div class="sidebar-label">
-          TARGET MACHINES
+          <span>Target Endpoints</span>
           <span class="badge" id="targetCount">0</span>
         </div>
         <div class="targets-list" id="targetsList">
-          <div class="empty-state">No targets added</div>
+          <div class="empty-state">No targets configured</div>
         </div>
-        <button class="btn btn-sm btn-outline" id="btnAddTarget"
-                style="margin-top:8px;width:100%">+ Add Target</button>
+        <button class="btn btn-outline btn-sm" id="btnAddTarget" style="width:100%;margin-top:6px;">
+          <svg class="lucide lucide-sm"><use href="#icon-plus"></use></svg>
+          <span>Add Target</span>
+        </button>
       </div>
 
-      <!-- Quick Commands -->
+      <!-- Quick Commands (Shadcn Ghost Buttons) -->
       <div class="sidebar-block">
-        <div class="sidebar-label">QUICK COMMANDS</div>
+        <div class="sidebar-label">Forensic Primitives</div>
         <div class="quick-cmds">
-          <button class="qcmd" data-cmd="scan.processes()"
-                  title="List all running processes">
-            <span class="qcmd-icon">⚙</span> scan.processes()
+          <button class="qcmd" data-cmd="scan.processes()" title="Extract active process tree">
+            <span class="qcmd-icon"><svg class="lucide"><use href="#icon-cpu"></use></svg></span>
+            <span>scan.processes()</span>
           </button>
-          <button class="qcmd" data-cmd="scan.network.connections()"
-                  title="Active network connections">
-            <span class="qcmd-icon">🌐</span> scan.network()
+          <button class="qcmd" data-cmd="scan.network.connections()" title="Network socket audit">
+            <span class="qcmd-icon"><svg class="lucide"><use href="#icon-network"></use></svg></span>
+            <span>scan.network()</span>
           </button>
-          <button class="qcmd" data-cmd="scan.usb.history()"
-                  title="USB device history">
-            <span class="qcmd-icon">🔌</span> scan.usb.history()
+          <button class="qcmd" data-cmd="scan.usb.history()" title="USB storage artifact history">
+            <span class="qcmd-icon"><svg class="lucide"><use href="#icon-usb"></use></svg></span>
+            <span>scan.usb.history()</span>
           </button>
-          <button class="qcmd" data-cmd="scan.logins()"
-                  title="Login event history">
-            <span class="qcmd-icon">👤</span> scan.logins()
+          <button class="qcmd" data-cmd="scan.logins()" title="Account authentication audit">
+            <span class="qcmd-icon"><svg class="lucide"><use href="#icon-user"></use></svg></span>
+            <span>scan.logins()</span>
           </button>
-          <button class="qcmd" data-cmd="scan.system()"
-                  title="Full system information">
-            <span class="qcmd-icon">💻</span> scan.system()
+          <button class="qcmd" data-cmd="scan.system()" title="OS and hardware telemetry">
+            <span class="qcmd-icon"><svg class="lucide"><use href="#icon-laptop"></use></svg></span>
+            <span>scan.system()</span>
           </button>
-          <button class="qcmd" data-cmd="scan.registry()"
-                  title="Registry persistence keys">
-            <span class="qcmd-icon">🗂</span> scan.registry()
+          <button class="qcmd" data-cmd="scan.registry()" title="Persistence keys and registry">
+            <span class="qcmd-icon"><svg class="lucide"><use href="#icon-database"></use></svg></span>
+            <span>scan.registry()</span>
           </button>
-          <button class="qcmd" data-cmd="scan.files()"
-                  title="File system scan">
-            <span class="qcmd-icon">📁</span> scan.files()
+          <button class="qcmd" data-cmd="scan.files()" title="Volatile file system scan">
+            <span class="qcmd-icon"><svg class="lucide"><use href="#icon-file"></use></svg></span>
+            <span>scan.files()</span>
           </button>
         </div>
       </div>
 
       <!-- Polymorphic Engine -->
       <div class="sidebar-block">
-        <div class="sidebar-label">POLYMORPHIC ENGINE</div>
-        <button class="btn btn-sm btn-cyber" id="btnMorph"
-                style="width:100%">⚗ Morph Script</button>
-        <div class="morph-hashes" id="morphHashes"></div>
+        <div class="sidebar-label">Polymorphic Engine</div>
+        <button class="btn btn-secondary btn-sm" id="btnMorph" style="width:100%;">
+          <svg class="lucide lucide-sm"><use href="#icon-branch"></use></svg>
+          <span>Generate Polymorphic Builds</span>
+        </button>
+        <div class="morph-hashes" id="morphHashes" style="margin-top:6px;"></div>
       </div>
 
     </aside>
 
-    <!-- ── CENTRE PANEL ───────────────────────────────────────────────────── -->
+    <!-- Center Panel: Terminal & Structured Results -->
     <main class="main-panel">
 
-      <!-- Terminal -->
+      <!-- Interactive Console -->
       <div class="terminal-wrap">
         <div class="terminal-header">
-          <div class="terminal-dots">
-            <span class="tdot tdot-red"></span>
-            <span class="tdot tdot-yellow"></span>
-            <span class="tdot tdot-green"></span>
+          <div class="terminal-title-group">
+            <div class="terminal-dots">
+              <span class="tdot"></span>
+              <span class="tdot"></span>
+              <span class="tdot"></span>
+            </div>
+            <span class="terminal-title">jocky-cli &mdash; execution console</span>
           </div>
-          <span class="terminal-title">JOCKY Terminal — Command Interface</span>
           <div class="terminal-actions">
-            <button class="tbtn" id="btnClearTerminal" title="Clear">⌫ Clear</button>
-            <button class="tbtn" id="btnRunAll" title="Run on ALL targets">
-              ⚡ Run on All
+            <button class="btn-ghost" id="btnClearTerminal" title="Clear console">
+              <svg class="lucide lucide-sm"><use href="#icon-trash"></use></svg>
+              <span>Clear</span>
+            </button>
+            <button class="btn-ghost" id="btnRunAll" title="Execute on all target machines">
+              <svg class="lucide lucide-sm"><use href="#icon-zap"></use></svg>
+              <span>Run on All</span>
             </button>
           </div>
         </div>
+
         <div class="terminal-output" id="terminalOutput">
           <div class="term-line term-sys">
-            <span class="term-prompt">JOCKY</span>
-            <span class="term-text">&nbsp;Framework initialized. Ready for forensic operations.</span>
-          </div>
-          <div class="term-line term-sys">
-            <span class="term-prompt">JOCKY</span>
-            <span class="term-text">&nbsp;Select a case and target machine to begin.</span>
+            <span class="term-prompt">&gt;</span>
+            <span class="term-text">JOCKY Digital Forensic Framework initialized. Select a case and endpoint to commence analysis.</span>
           </div>
         </div>
+
         <div class="terminal-input-row">
-          <span class="term-input-prompt">jocky&gt;</span>
-          <input type="text" id="terminalInput"
-                 class="term-input"
-                 placeholder="Type JOCKY command or script... (e.g. scan.processes())"
+          <span class="term-input-prompt"><svg class="lucide lucide-sm"><use href="#icon-terminal"></use></svg></span>
+          <input type="text" id="terminalInput" class="term-input"
+                 placeholder="Enter JOCKY script or primitive (e.g. scan.processes())..."
                  autocomplete="off" spellcheck="false" />
-          <button class="btn btn-cyber" id="btnExecute">▶ Execute</button>
+          <button class="btn btn-primary btn-sm" id="btnExecute">
+            <svg class="lucide lucide-sm"><use href="#icon-play"></use></svg>
+            <span>Execute</span>
+          </button>
         </div>
       </div>
 
-      <!-- Results Panel -->
+      <!-- Structured Results Viewer -->
       <div class="results-panel" id="resultsPanel">
         <div class="results-header">
-          <span class="results-title" id="resultTitle">Results</span>
+          <span class="results-title" id="resultTitle">
+            <svg class="lucide lucide-sm"><use href="#icon-file"></use></svg>
+            <span>Evidence Output</span>
+          </span>
           <div class="results-actions">
-            <button class="tbtn" id="btnExportJson">⬇ JSON</button>
-            <button class="tbtn" id="btnExportReport">📄 PDF Report</button>
+            <button class="btn-ghost" id="btnExportJson">
+              <svg class="lucide lucide-sm"><use href="#icon-download"></use></svg>
+              <span>Export JSON</span>
+            </button>
+            <button class="btn-ghost" id="btnExportReport">
+              <svg class="lucide lucide-sm"><use href="#icon-file"></use></svg>
+              <span>PDF Report</span>
+            </button>
           </div>
         </div>
+
         <div class="results-body" id="resultsBody">
           <div class="empty-results">
-            <div class="empty-icon">🔍</div>
-            <div>Run a JOCKY command to see results here.</div>
+            <svg class="lucide lucide-lg" style="color:#52525b;"><use href="#icon-search"></use></svg>
+            <span>No forensic artifacts collected yet. Execute a command to populate telemetry.</span>
           </div>
         </div>
       </div>
 
     </main>
 
-    <!-- ── RIGHT PANEL ────────────────────────────────────────────────────── -->
+    <!-- Right Panel: Telemetry, Evasion, & Cloudfronting -->
     <aside class="right-panel">
 
-      <!-- Stats -->
+      <!-- Stats Grid -->
       <div class="rp-block">
-        <div class="sidebar-label">FORENSIC STATS</div>
+        <div class="sidebar-label">Session Telemetry</div>
         <div class="stats-grid">
           <div class="stat-card">
             <div class="stat-val" id="statTargets">0</div>
-            <div class="stat-lbl">Targets</div>
+            <div class="stat-lbl">Endpoints</div>
           </div>
           <div class="stat-card">
             <div class="stat-val" id="statEvidence">0</div>
-            <div class="stat-lbl">Evidence</div>
+            <div class="stat-lbl">Artifacts</div>
           </div>
           <div class="stat-card">
             <div class="stat-val" id="statCases">0</div>
@@ -205,252 +280,203 @@
         </div>
       </div>
 
-      <!-- Evidence Hash Chain -->
+      <!-- Chain of Custody -->
       <div class="rp-block">
-        <div class="sidebar-label">CHAIN OF CUSTODY</div>
+        <div class="sidebar-label">Chain of Custody (SHA-256)</div>
         <div class="hash-chain" id="hashChain">
-          <div class="empty-state">No evidence yet</div>
+          <div class="empty-state">No verification hashes recorded</div>
         </div>
       </div>
 
-      <!-- LLVM Compiler Panel -->
+      <!-- LLVM Cross Compiler -->
       <div class="rp-block">
-        <div class="sidebar-label">JOCKY LLVM COMPILER</div>
+        <div class="sidebar-label">LLVM Cross-Compiler</div>
         <div class="compiler-panel">
-          <button class="btn btn-sm btn-cyber" id="btnCompile"
-                  style="width:100%">⚙ Compile Script</button>
+          <button class="btn btn-outline btn-sm" id="btnCompile" style="width:100%;">
+            <svg class="lucide lucide-sm"><use href="#icon-code"></use></svg>
+            <span>Compile to LLVM IR</span>
+          </button>
           <div class="compiler-output" id="compilerOutput">
-            <span class="co-hint">Compile a JOCKY script to see LLVM IR output.</span>
+            <span style="color:#52525b;">Compile a JOCKY script to view LLVM IR basic blocks.</span>
           </div>
         </div>
       </div>
 
-      <!-- Stealth Status -->
+      <!-- In-Memory Stealth Suite -->
       <div class="rp-block">
-        <div class="sidebar-label">STEALTH ENGINE STATUS (CROSS-PLATFORM)</div>
+        <div class="sidebar-label">In-Memory Execution Suite</div>
         <div class="stealth-tabs">
-          <button class="st-tab active" id="tabWinStealth" onclick="switchStealthPlatform('win')">🪟 WINDOWS x64</button>
-          <button class="st-tab" id="tabLinuxStealth" onclick="switchStealthPlatform('linux')">🐧 UBUNTU / LINUX</button>
+          <button class="st-tab active" id="tabWinStealth" onclick="switchStealthPlatform('win')">
+            <svg class="lucide lucide-sm"><use href="#icon-shield"></use></svg>
+            <span>Windows x64</span>
+          </button>
+          <button class="st-tab" id="tabLinuxStealth" onclick="switchStealthPlatform('linux')">
+            <svg class="lucide lucide-sm"><use href="#icon-terminal"></use></svg>
+            <span>Ubuntu / Linux</span>
+          </button>
         </div>
 
-        <!-- Windows Stealth Suite -->
+        <!-- Windows Stealth List -->
         <div class="stealth-status" id="stealthListWin">
           <div class="stealth-item" id="stealthSyscalls">
-            <span class="stealth-icon">⚡</span>
-            <span>Direct Syscalls (SysWhispers3)</span>
+            <div class="stealth-title-wrap">
+              <svg class="lucide lucide-sm"><use href="#icon-zap"></use></svg>
+              <span>Direct Syscalls (SysWhispers3)</span>
+            </div>
             <span class="stealth-badge active">ACTIVE</span>
           </div>
           <div class="stealth-item" id="stealthAPIUnhook">
-            <span class="stealth-icon">🔓</span>
-            <span>API Unhooking (ntdll.dll)</span>
+            <div class="stealth-title-wrap">
+              <svg class="lucide lucide-sm"><use href="#icon-unlock"></use></svg>
+              <span>API Unhooking (ntdll.dll)</span>
+            </div>
             <span class="stealth-badge active">ACTIVE</span>
           </div>
           <div class="stealth-item" id="stealthHollow">
-            <span class="stealth-icon">👻</span>
-            <span>Process Hollowing</span>
-            <span class="stealth-badge demo">DEMO</span>
+            <div class="stealth-title-wrap">
+              <svg class="lucide lucide-sm"><use href="#icon-shield"></use></svg>
+              <span>Process Hollowing</span>
+            </div>
+            <span class="stealth-badge demo">LOADED</span>
           </div>
           <div class="stealth-item" id="stealthReflective">
-            <span class="stealth-icon">💉</span>
-            <span>Reflective DLL Injection</span>
-            <span class="stealth-badge demo">DEMO</span>
+            <div class="stealth-title-wrap">
+              <svg class="lucide lucide-sm"><use href="#icon-file"></use></svg>
+              <span>Reflective DLL Injection</span>
+            </div>
+            <span class="stealth-badge demo">LOADED</span>
           </div>
           <div class="stealth-item" id="stealthThreadHijack">
-            <span class="stealth-icon">🧵</span>
-            <span>Thread Context Hijack</span>
-            <span class="stealth-badge demo">DEMO</span>
+            <div class="stealth-title-wrap">
+              <svg class="lucide lucide-sm"><use href="#icon-cpu"></use></svg>
+              <span>Thread Context Hijacking</span>
+            </div>
+            <span class="stealth-badge demo">LOADED</span>
           </div>
           <div class="stealth-item" id="stealthInMemory">
-            <span class="stealth-icon">🧠</span>
-            <span>In-Memory Fileless Exec</span>
+            <div class="stealth-title-wrap">
+              <svg class="lucide lucide-sm"><use href="#icon-lock"></use></svg>
+              <span>In-Memory RAM Fileless</span>
+            </div>
             <span class="stealth-badge active">ACTIVE</span>
           </div>
         </div>
 
-        <!-- Linux / Ubuntu Stealth Suite -->
+        <!-- Linux Stealth List -->
         <div class="stealth-status" id="stealthListLinux" style="display:none;">
           <div class="stealth-item" id="stealthLinuxSyscalls">
-            <span class="stealth-icon">⚡</span>
-            <span>Raw Linux Syscalls (No libc)</span>
+            <div class="stealth-title-wrap">
+              <svg class="lucide lucide-sm"><use href="#icon-zap"></use></svg>
+              <span>Raw Linux Syscalls (No libc)</span>
+            </div>
             <span class="stealth-badge active">ACTIVE</span>
           </div>
           <div class="stealth-item" id="stealthLinuxUnhook">
-            <span class="stealth-icon">🔓</span>
-            <span>libc.so.6 Unhook & LD_PRELOAD Strip</span>
+            <div class="stealth-title-wrap">
+              <svg class="lucide lucide-sm"><use href="#icon-unlock"></use></svg>
+              <span>libc.so.6 Unhook &amp; LD_PRELOAD</span>
+            </div>
             <span class="stealth-badge active">ACTIVE</span>
           </div>
           <div class="stealth-item" id="stealthLinuxHollow">
-            <span class="stealth-icon">👻</span>
-            <span>ptrace + /proc/self/mem Hollow</span>
-            <span class="stealth-badge demo">DEMO</span>
+            <div class="stealth-title-wrap">
+              <svg class="lucide lucide-sm"><use href="#icon-shield"></use></svg>
+              <span>ptrace + /proc/self/mem Hollow</span>
+            </div>
+            <span class="stealth-badge demo">LOADED</span>
           </div>
           <div class="stealth-item" id="stealthLinuxMemfd">
-            <span class="stealth-icon">💉</span>
-            <span>memfd_create Fileless Exec</span>
-            <span class="stealth-badge active">ACTIVE</span>
-          </div>
-          <div class="stealth-item" id="stealthLinuxPtrace">
-            <span class="stealth-icon">🧵</span>
-            <span>Process Context Hijack</span>
-            <span class="stealth-badge demo">DEMO</span>
-          </div>
-        </div>
-
-        <!-- Shared Core Engines -->
-        <div class="stealth-status" style="margin-top:6px;">
-          <div class="stealth-item" id="stealthPoly">
-            <span class="stealth-icon">🧬</span>
-            <span>Polymorphic Engine</span>
-            <span class="stealth-badge active">ACTIVE</span>
-          </div>
-          <div class="stealth-item" id="stealthLLVM">
-            <span class="stealth-icon">⚙</span>
-            <span>LLVM Cross-Compiler (Win & Lin)</span>
+            <div class="stealth-title-wrap">
+              <svg class="lucide lucide-sm"><use href="#icon-file"></use></svg>
+              <span>memfd_create Fileless Exec</span>
+            </div>
             <span class="stealth-badge active">ACTIVE</span>
           </div>
         </div>
       </div>
 
-      <!-- Cloud Infrastructure & Network Evasion (Domain Fronting + SOCKS5) -->
+      <!-- Network Evasion & CDN Domain Fronting -->
       <div class="rp-block">
-        <div class="sidebar-label">NETWORK EVASION (CDN & SOCKS5)</div>
+        <div class="sidebar-label">Network Evasion (CDN &amp; SOCKS5)</div>
         <div class="stealth-status">
           <div class="stealth-item" id="netDomainFront">
-            <span class="stealth-icon">☁️</span>
-            <div>
-              <div style="font-weight:600;">Domain Fronting (CDN)</div>
-              <div style="font-size:0.56rem;color:var(--text-3);">SNI: cloudflare.com &rarr; jocky-c2</div>
+            <div class="stealth-title-wrap">
+              <svg class="lucide lucide-sm"><use href="#icon-cloud"></use></svg>
+              <div>
+                <div>Domain Fronting (CDN)</div>
+                <div style="font-size:0.6rem;color:#71717a;">SNI: cloudflare.com</div>
+              </div>
             </div>
             <span class="stealth-badge active">ACTIVE</span>
           </div>
           <div class="stealth-item" id="netOriginShield">
-            <span class="stealth-icon">🛡️</span>
-            <div>
-              <div style="font-weight:600;">Origin IP Shield</div>
-              <div style="font-size:0.56rem;color:var(--text-3);">C2 IP Masked by Cloudflare</div>
+            <div class="stealth-title-wrap">
+              <svg class="lucide lucide-sm"><use href="#icon-shield"></use></svg>
+              <div>
+                <div>Origin IP Shield</div>
+                <div style="font-size:0.6rem;color:#71717a;">Anycast Concealment</div>
+              </div>
             </div>
-            <span class="stealth-badge active">PROTECTED</span>
+            <span class="stealth-badge active">SHIELDED</span>
           </div>
           <div class="stealth-item" id="netSocks5">
-            <span class="stealth-icon">🧦</span>
-            <div>
-              <div style="font-weight:600;">SOCKS5 Tunnel (RFC 1928)</div>
-              <div style="font-size:0.56rem;color:var(--text-3);">127.0.0.1:1080 (No Auth)</div>
+            <div class="stealth-title-wrap">
+              <svg class="lucide lucide-sm"><use href="#icon-network"></use></svg>
+              <div>
+                <div>SOCKS5 (RFC 1928)</div>
+                <div style="font-size:0.6rem;color:#71717a;">127.0.0.1:1080 Tunnel</div>
+              </div>
             </div>
             <span class="stealth-badge active">TUNNEL</span>
           </div>
         </div>
-        <div style="display:flex; gap:6px; margin-top:8px;">
-          <button class="btn btn-sm btn-cyber" id="btnTestDomainFront" style="flex:1; font-size:0.6rem;" title="Test Cloudflare CDN Domain Fronting">
-            ☁️ Test CDN Front
+
+        <div style="display:flex;gap:6px;margin-top:6px;">
+          <button class="btn btn-outline btn-sm" id="btnTestDomainFront" style="flex:1;" title="Test Cloudflare CDN Domain Fronting">
+            <svg class="lucide lucide-sm"><use href="#icon-cloud"></use></svg>
+            <span>Test CDN Front</span>
           </button>
-          <button class="btn btn-sm btn-cyber" id="btnTestSocks5" style="flex:1; font-size:0.6rem;" title="Test SOCKS5 Encapsulated Tunnel">
-            🧦 Test SOCKS5
+          <button class="btn btn-outline btn-sm" id="btnTestSocks5" style="flex:1;" title="Test SOCKS5 Encapsulated Tunnel">
+            <svg class="lucide lucide-sm"><use href="#icon-network"></use></svg>
+            <span>Test SOCKS5</span>
           </button>
         </div>
-        <button class="btn btn-sm btn-outline" id="btnInspectPackets" style="width:100%; margin-top:6px; font-size:0.62rem; color:var(--cyan); border-color:rgba(0,210,255,0.4);" title="View wire-level packets and EDR detection comparison">
-          🔬 Inspect Wire Packets (EDR View)
+
+        <button class="btn btn-secondary btn-sm" id="btnInspectPackets" style="width:100%;margin-top:6px;" title="View wire-level packets and EDR detection comparison">
+          <svg class="lucide lucide-sm"><use href="#icon-search"></use></svg>
+          <span>Inspect Wire Packets (EDR View)</span>
         </button>
       </div>
 
     </aside>
+
   </div><!-- /.layout -->
 
 </div><!-- /#app -->
 
-<!-- EDR Packet Inspector Modal -->
-<div class="modal-overlay hidden" id="modalPacketInspect">
-  <div class="modal-box" style="max-width:750px; width:95%;">
-    <div class="modal-header">
-      <div style="font-weight:700; color:var(--cyan); letter-spacing:1px; display:flex; align-items:center; gap:8px;">
-        <span>🔬</span> WIRESHARK & EDR DEEP PACKET INSPECTION (DPI)
-      </div>
-      <button class="modal-close" id="closeModalPackets">&times;</button>
-    </div>
-    <div class="modal-body" style="padding:16px; font-size:0.75rem;">
-      <div style="margin-bottom:12px; color:var(--text-2);">
-        Comparing wire telemetry received by enterprise network sensors / EDR packet monitors:
-      </div>
-      
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-        <!-- Left: Traditional Script (Blocked) -->
-        <div style="background:rgba(255,50,50,0.06); border:1px solid rgba(255,50,50,0.3); border-radius:6px; padding:12px;">
-          <div style="color:#ff5555; font-weight:700; margin-bottom:8px; display:flex; justify-content:space-between;">
-            <span>❌ Traditional Script</span>
-            <span style="background:rgba(255,50,50,0.2); padding:1px 6px; border-radius:4px; font-size:0.65rem;">BLOCKED</span>
-          </div>
-          <div style="font-family:monospace; line-height:1.6; font-size:0.68rem; color:#ffaaaa;">
-            <div><b>Src IP:</b> 192.168.1.105 (Host)</div>
-            <div><b>Dst IP:</b> <span style="color:#ff4444; font-weight:700;">203.0.113.88:8000</span></div>
-            <div><b>Protocol:</b> HTTP (Cleartext)</div>
-            <div><b>TLS SNI:</b> None (Unencrypted)</div>
-            <div><b>Visible Host:</b> c2.unknown-attacker.net</div>
-            <div style="margin-top:8px; border-top:1px dashed rgba(255,50,50,0.3); padding-top:6px;">
-              <b>EDR Verdict:</b> 🚨 ALERT (Threat: 98/100)
-              <div style="font-size:0.62rem; color:#ff8888;">* Unrated foreign IP address</div>
-              <div style="font-size:0.62rem; color:#ff8888;">* Non-standard port 8000 beaconing</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right: JOCKY Domain Fronting (Bypassed) -->
-        <div style="background:rgba(0,255,180,0.06); border:1px solid rgba(0,255,180,0.3); border-radius:6px; padding:12px;">
-          <div style="color:var(--green); font-weight:700; margin-bottom:8px; display:flex; justify-content:space-between;">
-            <span>🟢 JOCKY Domain Fronting</span>
-            <span style="background:rgba(0,255,180,0.2); padding:1px 6px; border-radius:4px; font-size:0.65rem;">ALLOWED</span>
-          </div>
-          <div style="font-family:monospace; line-height:1.6; font-size:0.68rem; color:#aaffdd;">
-            <div><b>Src IP:</b> 192.168.1.105 (Host)</div>
-            <div><b>Dst IP:</b> <span style="color:var(--green); font-weight:700;" id="piCloudflareIP">104.16.132.229:443</span></div>
-            <div><b>Protocol:</b> HTTPS (TLS 1.3 Anycast)</div>
-            <div><b>TLS SNI:</b> <span style="color:var(--cyan);">cloudflare.com</span></div>
-            <div><b>Cipher:</b> <span id="piCipher">TLS_AES_256_GCM_SHA384</span></div>
-            <div><b>Inner Host:</b> <span style="color:#88aaff;">[ENCRYPTED IN TLS PAYLOAD]</span></div>
-            <div style="margin-top:8px; border-top:1px dashed rgba(0,255,180,0.3); padding-top:6px;">
-              <b>EDR Verdict:</b> ✅ BENIGN (Threat: 0/100)
-              <div style="font-size:0.62rem; color:var(--text-2);">* Whitelisted Cloudflare Anycast CDN</div>
-              <div style="font-size:0.62rem; color:var(--text-2);">* Standard HTTPS Port 443</div>
-              <div style="font-size:0.62rem; color:var(--text-2);">* Target server completely hidden</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div style="margin-top:14px; background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:6px; padding:10px; font-family:monospace; font-size:0.65rem;">
-        <div style="color:var(--cyan); font-weight:700; margin-bottom:4px;">LIVE EDGE WORKER REVERSE PROXY:</div>
-        <div style="color:var(--text-2);">URL: <a href="https://jocky-c2.sharukheshs.workers.dev" target="_blank" style="color:var(--cyan);">https://jocky-c2.sharukheshs.workers.dev</a></div>
-        <div style="color:var(--text-3); font-size:0.6rem; margin-top:2px;">TLS SNI handshake presents 'cloudflare.com' &mdash; firewalls only see legitimate Cloudflare cloud transit.</div>
-      </div>
-    </div>
-    <div class="modal-footer" style="padding:10px 16px; display:flex; justify-content:flex-end;">
-      <button class="btn btn-sm btn-cyber" id="btnClosePacketModal">Close Inspector</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── MODALS ─────────────────────────────────────────────────────────────── -->
+<!-- ── MODALS (SHADCN DIALOGS) ──────────────────────────────────────────────── -->
 
 <!-- New Case Modal -->
 <div class="modal-overlay hidden" id="modalNewCase">
   <div class="modal">
     <div class="modal-header">
-      <h2>Create New Case</h2>
-      <button class="modal-close" id="closeModalCase">✕</button>
+      <h2>
+        <svg class="lucide"><use href="#icon-file"></use></svg>
+        <span>Create Investigation Case</span>
+      </h2>
+      <button class="modal-close" id="closeModalCase"><svg class="lucide"><use href="#icon-close"></use></svg></button>
     </div>
     <div class="modal-body">
-      <label class="form-label">Case Name</label>
-      <input type="text" id="inputCaseName" class="form-input"
-             placeholder="e.g. Operation Nighthawk" />
-      <label class="form-label">Investigating Officer</label>
-      <input type="text" id="inputOfficer" class="form-input"
-             placeholder="Inspector / Officer Name" />
-      <label class="form-label">Description</label>
-      <textarea id="inputDesc" class="form-input" rows="3"
-                placeholder="Brief case description..."></textarea>
+      <label class="form-label">Case Identifier</label>
+      <input type="text" id="inputCaseName" class="form-input" placeholder="e.g. OPERATION-NIGHTHAWK-2026" />
+      <label class="form-label">Forensic Investigator</label>
+      <input type="text" id="inputOfficer" class="form-input" placeholder="Lead Investigator Name" />
+      <label class="form-label">Scope Description</label>
+      <textarea id="inputDesc" class="form-input" rows="3" placeholder="Case scope and target environment details..."></textarea>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-outline" id="btnCancelCase">Cancel</button>
-      <button class="btn btn-cyber" id="btnCreateCase">Create Case</button>
+      <button class="btn btn-outline btn-sm" id="btnCancelCase">Cancel</button>
+      <button class="btn btn-primary btn-sm" id="btnCreateCase">Create Case</button>
     </div>
   </div>
 </div>
@@ -459,48 +485,117 @@
 <div class="modal-overlay hidden" id="modalAddTarget">
   <div class="modal">
     <div class="modal-header">
-      <h2>Add Target Machine</h2>
-      <button class="modal-close" id="closeModalTarget">✕</button>
+      <h2>
+        <svg class="lucide"><use href="#icon-laptop"></use></svg>
+        <span>Register Target Endpoint</span>
+      </h2>
+      <button class="modal-close" id="closeModalTarget"><svg class="lucide"><use href="#icon-close"></use></svg></button>
     </div>
     <div class="modal-body">
-      <label class="form-label">Target IP Address</label>
-      <input type="text" id="inputTargetIP" class="form-input"
-             placeholder="192.168.1.101" />
-      <label class="form-label">Port</label>
-      <input type="number" id="inputTargetPort" class="form-input"
-             value="5000" />
-      <label class="form-label">Alias (optional)</label>
-      <input type="text" id="inputTargetName" class="form-input"
-             placeholder="e.g. SUSPECT-LAPTOP-01" />
+      <label class="form-label">Endpoint IP Address</label>
+      <input type="text" id="inputTargetIP" class="form-input" placeholder="192.168.1.101" />
+      <label class="form-label">Agent Port</label>
+      <input type="number" id="inputTargetPort" class="form-input" value="5000" />
+      <label class="form-label">Host Identifier (Alias)</label>
+      <input type="text" id="inputTargetName" class="form-input" placeholder="SUSPECT-WORKSTATION-01" />
     </div>
     <div class="modal-footer">
-      <button class="btn btn-outline" id="btnCancelTarget">Cancel</button>
-      <button class="btn btn-cyber" id="btnConfirmTarget">Add Target</button>
+      <button class="btn btn-outline btn-sm" id="btnCancelTarget">Cancel</button>
+      <button class="btn btn-primary btn-sm" id="btnConfirmTarget">Add Target</button>
     </div>
   </div>
 </div>
 
-<!-- Morph Modal -->
+<!-- Polymorphic Engine Modal -->
 <div class="modal-overlay hidden" id="modalMorph">
   <div class="modal modal-wide">
     <div class="modal-header">
-      <h2>🧬 Polymorphic Engine</h2>
-      <button class="modal-close" id="closeModalMorph">✕</button>
+      <h2>
+        <svg class="lucide"><use href="#icon-branch"></use></svg>
+        <span>Automated Polymorphic Engine</span>
+      </h2>
+      <button class="modal-close" id="closeModalMorph"><svg class="lucide"><use href="#icon-close"></use></svg></button>
     </div>
     <div class="modal-body">
-      <label class="form-label">JOCKY Script to Morph</label>
-      <textarea id="morphInput" class="form-input mono-input" rows="6"
+      <label class="form-label">Source JOCKY Script</label>
+      <textarea id="morphInput" class="form-input mono-input" rows="5"
                 placeholder="scan.processes()&#10;scan.network.connections()&#10;report.send(&quot;dashboard&quot;)"></textarea>
-      <div style="display:flex;gap:12px;margin-top:8px;align-items:center">
-        <label class="form-label" style="margin:0">Builds:</label>
-        <select id="morphBuilds" class="select-input" style="width:80px">
+      <div style="display:flex;gap:12px;margin-top:10px;align-items:center;">
+        <label class="form-label" style="margin:0;">Iterations:</label>
+        <select id="morphBuilds" class="select-input" style="width:70px;">
           <option value="3">3</option>
           <option value="5">5</option>
           <option value="10">10</option>
         </select>
-        <button class="btn btn-cyber" id="btnRunMorph">Run Morphic Engine</button>
+        <button class="btn btn-primary btn-sm" id="btnRunMorph">
+          <svg class="lucide lucide-sm"><use href="#icon-branch"></use></svg>
+          <span>Run Polymorphic Morphing</span>
+        </button>
       </div>
-      <div class="morph-result" id="morphResult"></div>
+      <div class="morph-result" id="morphResult" style="margin-top:10px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Wire Packet Inspector Modal -->
+<div class="modal-overlay hidden" id="modalPacketInspect">
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <h2>
+        <svg class="lucide"><use href="#icon-search"></use></svg>
+        <span>Deep Packet Inspection (DPI) &amp; Wire Comparison</span>
+      </h2>
+      <button class="modal-close" id="closeModalPackets"><svg class="lucide"><use href="#icon-close"></use></svg></button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:0.72rem;color:#a1a1aa;margin-bottom:12px;">
+        Comparing outbound wire telemetry received by enterprise packet sensors:
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <!-- Left: Traditional Script (Blocked) -->
+        <div style="background:#18181b;border:1px solid rgba(239,68,68,0.3);border-radius:4px;padding:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-weight:600;color:#f87171;">Standard Script</span>
+            <span style="font-size:0.6rem;background:rgba(239,68,68,0.15);color:#f87171;padding:1px 6px;border-radius:2px;font-family:var(--font-mono);">BLOCKED</span>
+          </div>
+          <div style="font-family:var(--font-mono);font-size:0.68rem;line-height:1.6;color:#a1a1aa;">
+            <div>Src IP: 192.168.1.105 (Host)</div>
+            <div>Dst IP: <span style="color:#f87171;">203.0.113.88:8000</span></div>
+            <div>Protocol: HTTP Cleartext</div>
+            <div>TLS SNI: None (Unencrypted)</div>
+            <div>Host Header: c2.unknown-attacker.net</div>
+            <div style="margin-top:8px;padding-top:6px;border-top:1px solid #27272a;color:#ef4444;">
+              Verdict: Blocked (Threat Score: 98/100)
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: JOCKY Domain Fronting (Allowed) -->
+        <div style="background:#18181b;border:1px solid rgba(34,197,94,0.3);border-radius:4px;padding:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-weight:600;color:#4ade80;">JOCKY Domain Fronting</span>
+            <span style="font-size:0.6rem;background:rgba(34,197,94,0.15);color:#4ade80;padding:1px 6px;border-radius:2px;font-family:var(--font-mono);">ALLOWED</span>
+          </div>
+          <div style="font-family:var(--font-mono);font-size:0.68rem;line-height:1.6;color:#a1a1aa;">
+            <div>Src IP: 192.168.1.105 (Host)</div>
+            <div>Dst IP: <span style="color:#4ade80;" id="piCloudflareIP">104.16.132.229:443</span></div>
+            <div>Protocol: HTTPS (TLS 1.3 Anycast)</div>
+            <div>TLS SNI: cloudflare.com (Whitelisted)</div>
+            <div>Cipher: <span id="piCipher">TLS_AES_256_GCM_SHA384</span></div>
+            <div style="margin-top:8px;padding-top:6px;border-top:1px solid #27272a;color:#22c55e;">
+              Verdict: Allowed (Threat Score: 0/100)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;background:#09090b;border:1px solid var(--border);border-radius:4px;padding:8px 12px;font-family:var(--font-mono);font-size:0.65rem;">
+        <div style="color:#d4d4d8;margin-bottom:2px;">Live Cloudflare Anycast Gateway:</div>
+        <div><a href="https://jocky-c2.sharukheshs.workers.dev" target="_blank" style="color:#fafafa;text-decoration:underline;">https://jocky-c2.sharukheshs.workers.dev</a></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" id="btnClosePacketModal">Close Inspector</button>
     </div>
   </div>
 </div>
