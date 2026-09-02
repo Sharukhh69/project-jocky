@@ -38,5 +38,13 @@ if %ERRORLEVEL% EQU 0 (
     echo [FAIL] thread_hijack.c failed to compile
 )
 
+gcc -O2 direct_syscalls.c -o direct_syscalls.exe
+if %ERRORLEVEL% EQU 0 (
+    echo [OK] direct_syscalls.exe built successfully
+) else (
+    echo [FAIL] direct_syscalls.c failed to compile
+)
+
 echo.
 echo Build complete.
+

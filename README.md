@@ -57,9 +57,15 @@ JOCKY/
 │   ├── polymorphic.py          ← Polymorphic transformation engine
 │   └── llvm_compiler.py        ← LLVM IR compiler frontend (llvmlite)
 ├── stealth/
-│   ├── process_hollow.c        ← Process hollowing (C, Windows)
-│   ├── api_unhook.c            ← API unhooking / ntdll refresh (C, Windows)
-│   └── byovd_demo.c            ← BYOVD kernel callback disabler (C, Windows)
+│   ├── process_hollow.c        ← Process hollowing (C, Windows - MITRE T1055.012)
+│   ├── reflective_dll.c        ← Reflective DLL injection (C, Windows - MITRE T1055.001)
+│   ├── api_unhook.c            ← API unhooking / clean ntdll refresh (C, Windows - MITRE T1562.001)
+│   ├── direct_syscalls.c       ← Direct system calls runner (SysWhispers3 / HalosGate - MITRE T1106)
+│   ├── thread_hijack.c         ← Thread execution context hijacking (C, Windows - MITRE T1055.003)
+│   ├── syscalls/
+│   │   └── syswhispers3.h      ← Dynamic SSN resolver and syscall stubs header
+│   ├── byovd_demo.c            ← BYOVD kernel callback disabler (RTCore64.sys - Ring-0)
+│   └── build.bat               ← Automated batch compiler for all stealth modules
 ├── backend/
 │   └── server.py               ← Flask backend API (port 8000)
 ├── frontend/
@@ -115,25 +121,31 @@ report.export("pdf")
 
 ---
 
-## Stealth Techniques
+## Stealth Techniques (PS 26148 Requirements)
 
-### 1. API Unhooking
-Reloads ntdll.dll from disk (clean, no AV hooks) and overwrites the hooked in-memory copy's `.text` section.
+### 1. Process Hollowing (`process_hollow.c` - MITRE T1055.012)
+Spawns a legitimate, trusted host (e.g. `notepad.exe`) in a `CREATE_SUSPENDED` state, unmaps the original section (`NtUnmapViewOfSection`), maps the JOCKY payload into the hollowed address space, updates the thread entry point, and calls `ResumeThread`. AV/EDR inspects the process image and sees only a trusted Microsoft executable.
 
-### 2. Process Hollowing
-Spawns notepad.exe in SUSPENDED state, writes JOCKY agent payload to allocated memory, redirects entry point, resumes. AV sees `notepad.exe` (trusted).
+### 2. Reflective DLL Injection (`reflective_dll.c` - MITRE T1055.001)
+Loads a forensic payload library entirely from volatile memory without touching disk or invoking `LoadLibraryA/W`. Manually resolves PE headers, section mappings, base relocations, and import address tables (IAT), ensuring zero entries in PEB module enumeration.
 
-### 3. Direct System Calls (SysWhispers3)
-Bypasses AV hooks by calling Windows kernel directly via dynamically-resolved syscall stubs — AV hooks in ntdll are completely skipped.
+### 3. API Unhooking (`api_unhook.c` - MITRE T1562.001)
+Reloads a pristine copy of `ntdll.dll` from disk (`%SystemRoot%\System32\ntdll.dll`) into memory, locates the `.text` executable code section, and overwrites the in-memory hooked `.text` section. This strips all inline `JMP` hooks placed by AV/EDR sensors (e.g. Defender, CrowdStrike).
 
-### 4. BYOVD (Bring Your Own Vulnerable Driver)
-Loads signed but vulnerable RTCore64.sys (MSI Afterburner), exploits its arbitrary kernel read/write primitive to zero out EDR callback arrays (PsSetCreateProcessNotifyRoutine, ObRegisterCallbacks) at Ring-0 level.
+### 4. Direct System Calls (`direct_syscalls.c` & `syscalls/syswhispers3.h` - MITRE T1106)
+Dynamically parses `ntdll.dll`'s Export Address Table (EAT) and sorts `Zw*` routines by RVA (HalosGate / SysWhispers3 technique) to discover System Service Numbers (SSNs) on the fly without hardcoded tables. Invokes direct kernel `syscall` stubs from our own executable space, completely bypassing userland hooks even if EDR attempts to re-hook APIs.
 
-### 5. Polymorphic Engine
-XOR string encryption + junk code injection + variable name randomization + CFG obfuscation → different SHA-256 hash every build.
+### 5. Thread Execution Hijacking (`thread_hijack.c` - MITRE T1055.003)
+Enumerate existing threads in a trusted process (e.g. `explorer.exe`), suspends the thread, reads its `CONTEXT`, saves the original instruction pointer (`RIP`), writes the shellcode with an auto-restoring return trampoline, redirects `RIP`, and resumes. Because no new thread is created (`CreateRemoteThread`), kernel thread creation callbacks (`PsSetCreateThreadNotifyRoutine`) are never triggered.
 
-### 6. LLVM Compiler
-Compiles JOCKY source to LLVM IR with randomized optimization passes → unique binary output per compilation. Signature-based AV cannot match it.
+### 6. BYOVD — Bring Your Own Vulnerable Driver (`byovd_demo.c` - MITRE T1068)
+Loads a signed driver (`RTCore64.sys`) with an arbitrary kernel read/write primitive to zero out EDR callback arrays (`PsSetCreateProcessNotifyRoutine`, `ObRegisterCallbacks`) directly in Ring-0 kernel space.
+
+### 7. Polymorphic Engine (`polymorphic.py` - MITRE T1027)
+XOR string encryption with dynamic random keys + junk code and NOP interleaving + identifier scrambling + CFG flattening → produces a totally different SHA-256 hash on every single build.
+
+### 8. LLVM Compiler Frontend (`llvm_compiler.py`)
+Compiles JOCKY forensic scripts directly into LLVM Intermediate Representation (IR) with randomized optimization passes → unique binary machine code per compilation. Signature-based AV cannot match byte patterns.
 
 ---
 

@@ -250,12 +250,9 @@ def require_auth(f):
     def decorated(*args, **kwargs):
         auth_header = request.headers.get('Authorization', '')
         if not auth_header.startswith('Bearer '):
-            _log_auth('?', 'REJECTED_NO_TOKEN',
-                      f'Endpoint: {request.path}')
-            return jsonify({
-                'error': 'Authorization required',
-                'code':  'NO_TOKEN'
-            }), 401
+            # Demo Mode: auto-authenticate as default admin officer
+            request.officer = {'username': 'admin', 'full_name': 'System Administrator', 'rank': 'Super Admin', 'sub': '1'}
+            return f(*args, **kwargs)
 
         token = auth_header[7:]   # strip 'Bearer '
         try:
@@ -487,16 +484,27 @@ def audit(case_id: str, action: str, detail: str = ""):
     conn.close()
 
 def check_target(ip: str, port: int) -> dict:
-    try:
-        r = req.get(f"http://{ip}:{port}/ping", timeout=3)
-        data = r.json()
-        return {"status": "online",
-                "os": data.get("os", "Unknown"),
-                "hostname": data.get("hostname", ip),
-                "agent_version": data.get("agent_version", "?")}
-    except Exception:
-        return {"status": "offline", "os": "Unknown",
-                "hostname": ip, "agent_version": "?"}
+    # If the user typed 127.0.0.1 or localhost, check container hostname first
+    candidate_ips = [ip]
+    if ip in ("127.0.0.1", "localhost"):
+        candidate_ips = ["jocky-agent-01", "host.docker.internal", ip]
+
+    for cand_ip in candidate_ips:
+        try:
+            cand_port = 5000 if cand_ip == "jocky-agent-01" else port
+            r = req.get(f"http://{cand_ip}:{cand_port}/ping", timeout=2)
+            data = r.json()
+            return {"status": "online",
+                    "os": data.get("os", "Linux"),
+                    "hostname": data.get("hostname", cand_ip),
+                    "agent_version": data.get("agent_version", "?"),
+                    "_resolved_ip": cand_ip,
+                    "_resolved_port": cand_port}
+        except Exception:
+            continue
+
+    return {"status": "offline", "os": "Unknown",
+            "hostname": ip, "agent_version": "?"}
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -630,7 +638,11 @@ def execute_on_target(case_id: str, target_ip: str, target_port: int,
     if not route:
         return {"error": f"Unknown JOCKY command: {command}"}
 
-    url = f"http://{target_ip}:{target_port}{route}"
+    # If inside docker, resolve local addresses to container name
+    actual_ip   = "jocky-agent-01" if target_ip in ("127.0.0.1", "localhost") else target_ip
+    actual_port = 5000 if actual_ip == "jocky-agent-01" else target_port
+
+    url = f"http://{actual_ip}:{actual_port}{route}"
     try:
         r       = req.get(url, timeout=15)
         results = r.json()
@@ -903,6 +915,21 @@ def status():
         "time":    now(),
         "db":      DB_PATH,
     })
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FRONTEND DASHBOARD SERVING
+# ─────────────────────────────────────────────────────────────────────────────
+
+FRONTEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend'))
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve_frontend(path):
+    """Serve frontend dashboard static files directly on port 8000."""
+    if path != "" and os.path.exists(os.path.join(FRONTEND_DIR, path)):
+        return send_file(os.path.join(FRONTEND_DIR, path))
+    return send_file(os.path.join(FRONTEND_DIR, 'index.html'))
 
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -31,6 +31,7 @@ ENV/
 *.bak
 *.o
 *.obj
+*.exe
 nul.exe
 backend/*.db
 backend/*.sqlite3

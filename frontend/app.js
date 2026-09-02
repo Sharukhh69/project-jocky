@@ -115,7 +115,7 @@ async function apiPost(path, body) {
   return r.json();
 }
 
-// ── SERVER STATUS ─────────────────────────────────────────────────────────
+let _initialServerLogDone = false;
 async function checkServerStatus() {
   const dot  = $('serverDot');
   const text = $('serverStatusText');
@@ -123,7 +123,10 @@ async function checkServerStatus() {
     const data = await apiGet('/api/status');
     dot.className  = 'status-dot online';
     text.textContent = 'Server Online';
-    termLog('Connected to JOCKY Central Management Server', 'ok');
+    if (!_initialServerLogDone) {
+      termLog('Connected to JOCKY Central Management Server', 'ok');
+      _initialServerLogDone = true;
+    }
     return true;
   } catch {
     dot.className  = 'status-dot offline';
@@ -147,6 +150,12 @@ async function loadCases() {
       sel.appendChild(opt);
     });
     $('statCases').textContent = state.cases.length;
+
+    // Automatically select the first case if none is active
+    if (!state.activeCaseId && state.cases.length > 0) {
+      sel.value = state.cases[0].case_id;
+      selectCase(state.cases[0].case_id);
+    }
   } catch { /* server offline */ }
 }
 
@@ -185,6 +194,11 @@ async function loadTargets(caseId) {
     $('statTargets').textContent = state.targets.length;
     $('targetCount').textContent  = state.targets.length;
     $('statOnline').textContent   = online;
+
+    // Automatically select the first target if none is active
+    if (state.targets.length > 0 && !state.activeTargetIP) {
+      selectTarget(state.targets[0].target_ip, state.targets[0].target_port);
+    }
   } catch { /* no targets */ }
 }
 
