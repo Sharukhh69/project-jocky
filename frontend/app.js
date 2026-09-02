@@ -700,6 +700,20 @@ function wireEvents() {
     }
   });
 
+  // Packet Inspector Modal
+  $('btnInspectPackets').addEventListener('click', async () => {
+    openModal('modalPacketInspect');
+    try {
+      const res = await apiGet('/api/network/packet_inspect');
+      if (res && res.jocky_traffic) {
+        if ($('piCloudflareIP')) $('piCloudflareIP').textContent = res.jocky_traffic.dst_ip;
+        if ($('piCipher')) $('piCipher').textContent = res.jocky_traffic.cipher_suite;
+      }
+    } catch (e) {}
+  });
+  $('closeModalPackets').addEventListener('click', () => closeModal('modalPacketInspect'));
+  $('btnClosePacketModal').addEventListener('click', () => closeModal('modalPacketInspect'));
+
   // Click outside modal to close
   document.querySelectorAll('.modal-overlay').forEach(overlay => {
     overlay.addEventListener('click', e => {

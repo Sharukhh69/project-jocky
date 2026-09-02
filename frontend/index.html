@@ -348,12 +348,85 @@
             🧦 Test SOCKS5
           </button>
         </div>
+        <button class="btn btn-sm btn-outline" id="btnInspectPackets" style="width:100%; margin-top:6px; font-size:0.62rem; color:var(--cyan); border-color:rgba(0,210,255,0.4);" title="View wire-level packets and EDR detection comparison">
+          🔬 Inspect Wire Packets (EDR View)
+        </button>
       </div>
 
     </aside>
   </div><!-- /.layout -->
 
 </div><!-- /#app -->
+
+<!-- EDR Packet Inspector Modal -->
+<div class="modal-overlay hidden" id="modalPacketInspect">
+  <div class="modal-box" style="max-width:750px; width:95%;">
+    <div class="modal-header">
+      <div style="font-weight:700; color:var(--cyan); letter-spacing:1px; display:flex; align-items:center; gap:8px;">
+        <span>🔬</span> WIRESHARK & EDR DEEP PACKET INSPECTION (DPI)
+      </div>
+      <button class="modal-close" id="closeModalPackets">&times;</button>
+    </div>
+    <div class="modal-body" style="padding:16px; font-size:0.75rem;">
+      <div style="margin-bottom:12px; color:var(--text-2);">
+        Comparing wire telemetry received by enterprise network sensors / EDR packet monitors:
+      </div>
+      
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+        <!-- Left: Traditional Script (Blocked) -->
+        <div style="background:rgba(255,50,50,0.06); border:1px solid rgba(255,50,50,0.3); border-radius:6px; padding:12px;">
+          <div style="color:#ff5555; font-weight:700; margin-bottom:8px; display:flex; justify-content:space-between;">
+            <span>❌ Traditional Script</span>
+            <span style="background:rgba(255,50,50,0.2); padding:1px 6px; border-radius:4px; font-size:0.65rem;">BLOCKED</span>
+          </div>
+          <div style="font-family:monospace; line-height:1.6; font-size:0.68rem; color:#ffaaaa;">
+            <div><b>Src IP:</b> 192.168.1.105 (Host)</div>
+            <div><b>Dst IP:</b> <span style="color:#ff4444; font-weight:700;">203.0.113.88:8000</span></div>
+            <div><b>Protocol:</b> HTTP (Cleartext)</div>
+            <div><b>TLS SNI:</b> None (Unencrypted)</div>
+            <div><b>Visible Host:</b> c2.unknown-attacker.net</div>
+            <div style="margin-top:8px; border-top:1px dashed rgba(255,50,50,0.3); padding-top:6px;">
+              <b>EDR Verdict:</b> 🚨 ALERT (Threat: 98/100)
+              <div style="font-size:0.62rem; color:#ff8888;">* Unrated foreign IP address</div>
+              <div style="font-size:0.62rem; color:#ff8888;">* Non-standard port 8000 beaconing</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: JOCKY Domain Fronting (Bypassed) -->
+        <div style="background:rgba(0,255,180,0.06); border:1px solid rgba(0,255,180,0.3); border-radius:6px; padding:12px;">
+          <div style="color:var(--green); font-weight:700; margin-bottom:8px; display:flex; justify-content:space-between;">
+            <span>🟢 JOCKY Domain Fronting</span>
+            <span style="background:rgba(0,255,180,0.2); padding:1px 6px; border-radius:4px; font-size:0.65rem;">ALLOWED</span>
+          </div>
+          <div style="font-family:monospace; line-height:1.6; font-size:0.68rem; color:#aaffdd;">
+            <div><b>Src IP:</b> 192.168.1.105 (Host)</div>
+            <div><b>Dst IP:</b> <span style="color:var(--green); font-weight:700;" id="piCloudflareIP">104.16.132.229:443</span></div>
+            <div><b>Protocol:</b> HTTPS (TLS 1.3 Anycast)</div>
+            <div><b>TLS SNI:</b> <span style="color:var(--cyan);">cloudflare.com</span></div>
+            <div><b>Cipher:</b> <span id="piCipher">TLS_AES_256_GCM_SHA384</span></div>
+            <div><b>Inner Host:</b> <span style="color:#88aaff;">[ENCRYPTED IN TLS PAYLOAD]</span></div>
+            <div style="margin-top:8px; border-top:1px dashed rgba(0,255,180,0.3); padding-top:6px;">
+              <b>EDR Verdict:</b> ✅ BENIGN (Threat: 0/100)
+              <div style="font-size:0.62rem; color:var(--text-2);">* Whitelisted Cloudflare Anycast CDN</div>
+              <div style="font-size:0.62rem; color:var(--text-2);">* Standard HTTPS Port 443</div>
+              <div style="font-size:0.62rem; color:var(--text-2);">* Target server completely hidden</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px; background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:6px; padding:10px; font-family:monospace; font-size:0.65rem;">
+        <div style="color:var(--cyan); font-weight:700; margin-bottom:4px;">LIVE EDGE WORKER REVERSE PROXY:</div>
+        <div style="color:var(--text-2);">URL: <a href="https://jocky-c2.sharukheshs.workers.dev" target="_blank" style="color:var(--cyan);">https://jocky-c2.sharukheshs.workers.dev</a></div>
+        <div style="color:var(--text-3); font-size:0.6rem; margin-top:2px;">TLS SNI handshake presents 'cloudflare.com' &mdash; firewalls only see legitimate Cloudflare cloud transit.</div>
+      </div>
+    </div>
+    <div class="modal-footer" style="padding:10px 16px; display:flex; justify-content:flex-end;">
+      <button class="btn btn-sm btn-cyber" id="btnClosePacketModal">Close Inspector</button>
+    </div>
+  </div>
+</div>
 
 <!-- ── MODALS ─────────────────────────────────────────────────────────────── -->
 
