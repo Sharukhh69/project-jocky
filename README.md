@@ -57,15 +57,23 @@ JOCKY/
 │   ├── polymorphic.py          ← Polymorphic transformation engine
 │   └── llvm_compiler.py        ← LLVM IR compiler frontend (llvmlite)
 ├── stealth/
-│   ├── process_hollow.c        ← Process hollowing (C, Windows - MITRE T1055.012)
-│   ├── reflective_dll.c        ← Reflective DLL injection (C, Windows - MITRE T1055.001)
-│   ├── api_unhook.c            ← API unhooking / clean ntdll refresh (C, Windows - MITRE T1562.001)
-│   ├── direct_syscalls.c       ← Direct system calls runner (SysWhispers3 / HalosGate - MITRE T1106)
-│   ├── thread_hijack.c         ← Thread execution context hijacking (C, Windows - MITRE T1055.003)
-│   ├── syscalls/
-│   │   └── syswhispers3.h      ← Dynamic SSN resolver and syscall stubs header
-│   ├── byovd_demo.c            ← BYOVD kernel callback disabler (RTCore64.sys - Ring-0)
-│   └── build.bat               ← Automated batch compiler for all stealth modules
+│   ├── [Windows x64 Stealth Suite]
+│   │   ├── process_hollow.c    ← Process hollowing (C, Windows - MITRE T1055.012)
+│   │   ├── reflective_dll.c    ← Reflective DLL injection (C, Windows - MITRE T1055.001)
+│   │   ├── api_unhook.c        ← API unhooking / clean ntdll refresh (C, Windows - MITRE T1562.001)
+│   │   ├── direct_syscalls.c   ← Direct system calls runner (SysWhispers3 / HalosGate - MITRE T1106)
+│   │   ├── thread_hijack.c     ← Thread execution context hijacking (C, Windows - MITRE T1055.003)
+│   │   ├── syscalls/
+│   │   │   └── syswhispers3.h  ← Dynamic SSN resolver and syscall stubs header
+│   │   ├── byovd_demo.c        ← BYOVD kernel callback disabler (RTCore64.sys - Ring-0)
+│   │   └── build.bat           ← Windows batch compiler for stealth modules
+│   └── [Ubuntu / Linux Stealth Suite]
+│       ├── linux_unhook.c      ← libc.so.6 clean unhook & LD_PRELOAD strip (MITRE T1562.001)
+│       ├── linux_process_hollow.c ← ptrace + /proc/self/mem process replacement (MITRE T1055.012)
+│       ├── linux_direct_syscalls.c ← Raw inline x86_64 kernel syscalls skipping libc (MITRE T1106)
+│       ├── linux_memfd_exec.c  ← Anonymous in-memory fileless exec via memfd_create (MITRE T1620)
+│       ├── build_linux.sh      ← Ubuntu / Debian automated build script
+│       └── Makefile            ← Linux makefile for stealth compilation
 ├── backend/
 │   └── server.py               ← Flask backend API (port 8000)
 ├── frontend/
@@ -121,31 +129,37 @@ report.export("pdf")
 
 ---
 
-## Stealth Techniques (PS 26148 Requirements)
+## Cross-Platform Stealth Architecture (PS 26148 Requirements)
 
-### 1. Process Hollowing (`process_hollow.c` - MITRE T1055.012)
-Spawns a legitimate, trusted host (e.g. `notepad.exe`) in a `CREATE_SUSPENDED` state, unmaps the original section (`NtUnmapViewOfSection`), maps the JOCKY payload into the hollowed address space, updates the thread entry point, and calls `ResumeThread`. AV/EDR inspects the process image and sees only a trusted Microsoft executable.
+### A. Windows x64 Stealth Suite
+1. **Process Hollowing (`process_hollow.c` - MITRE T1055.012)**:
+   Spawns a legitimate, trusted host (e.g. `notepad.exe`) in a `CREATE_SUSPENDED` state, unmaps the original section (`NtUnmapViewOfSection`), maps the JOCKY payload into the hollowed address space, updates the thread entry point, and calls `ResumeThread`. AV/EDR sees only a trusted Microsoft executable.
+2. **Reflective DLL Injection (`reflective_dll.c` - MITRE T1055.001)**:
+   Loads a forensic payload library entirely from volatile memory without touching disk or invoking `LoadLibraryA/W`. Manually resolves PE headers, section mappings, base relocations, and import address tables (IAT), leaving zero PEB module footprints.
+3. **API Unhooking (`api_unhook.c` - MITRE T1562.001)**:
+   Reloads a pristine copy of `ntdll.dll` from disk (`%SystemRoot%\System32\ntdll.dll`) into memory, locates the `.text` executable code section, and overwrites the in-memory hooked `.text` section, neutralizing inline `JMP` patches placed by EDRs (Defender, CrowdStrike).
+4. **Direct System Calls (`direct_syscalls.c` & `syscalls/syswhispers3.h` - MITRE T1106)**:
+   Dynamically parses `ntdll.dll`'s Export Address Table (EAT) and sorts `Zw*` routines by RVA (HalosGate / SysWhispers3 technique) to resolve System Service Numbers (SSNs) on the fly. Invokes direct kernel `syscall` stubs from our own executable space, completely bypassing userland hooks.
+5. **Thread Execution Hijacking (`thread_hijack.c` - MITRE T1055.003)**:
+   Enumerates existing threads in a trusted process (e.g. `explorer.exe`), suspends the thread, reads its `CONTEXT`, saves the original instruction pointer (`RIP`), writes the shellcode with an auto-restoring return trampoline, redirects `RIP`, and resumes. Kernel thread creation callbacks (`PsSetCreateThreadNotifyRoutine`) remain completely silent.
+6. **BYOVD — Bring Your Own Vulnerable Driver (`byovd_demo.c` - MITRE T1068)**:
+   Loads signed `RTCore64.sys` driver to exploit arbitrary kernel read/write primitives, zeroing out EDR kernel callback arrays (`PsSetCreateProcessNotifyRoutine`, `ObRegisterCallbacks`) at Ring-0.
 
-### 2. Reflective DLL Injection (`reflective_dll.c` - MITRE T1055.001)
-Loads a forensic payload library entirely from volatile memory without touching disk or invoking `LoadLibraryA/W`. Manually resolves PE headers, section mappings, base relocations, and import address tables (IAT), ensuring zero entries in PEB module enumeration.
+### B. Ubuntu / Linux Stealth Suite
+1. **Linux Dynamic Linker & libc Unhooking (`linux_unhook.c` - MITRE T1562.001 / T1574.006)**:
+   Detects and unsets `LD_PRELOAD` userland interceptors. Parses `/proc/self/maps` to find loaded `libc.so.6`, reads clean `.text` bytes from `/lib/x86_64-linux-gnu/libc.so.6` on disk, changes memory protection via `mprotect(PROT_READ | PROT_WRITE | PROT_EXEC)`, and overwrites hooked in-memory functions to wipe monitoring hooks.
+2. **Linux Process Hollowing & Context Hijack (`linux_process_hollow.c` - MITRE T1055.012 / T1055.008)**:
+   Spawns or attaches to a benign Linux host (e.g. `/bin/sleep` or `top`) using `ptrace(PTRACE_ATTACH)`. Captures registers with `PTRACE_GETREGS`, writes JOCKY payload directly into executable segments via `/proc/<pid>/mem`, updates `regs.rip`, and resumes with `PTRACE_DETACH`. Process runs disguised under the benign process name in `ps -ef` and `top`.
+3. **Linux Direct Kernel Syscalls (`linux_direct_syscalls.c` - MITRE T1106)**:
+   Executes raw 64-bit Linux kernel syscalls (`__NR_write`, `__NR_mmap`, `__NR_ptrace`, `__NR_memfd_create`) via inline assembly (`syscall`), completely bypassing `libc.so.6` wrapper routines, eBPF userspace hooks, and `LD_PRELOAD` intercepts.
+4. **Linux In-Memory Fileless Execution (`linux_memfd_exec.c` - MITRE T1620 / T1059)**:
+   Linux counterpart to Reflective DLL loading: Uses `memfd_create` to allocate an anonymous RAM-backed file descriptor, writes the ELF payload into volatile memory, and invokes `fexecve`. Zero files are ever written to disk, leaving filesystem AV scanners (ClamAV, Sophos, OSSEC FIM) completely blind.
 
-### 3. API Unhooking (`api_unhook.c` - MITRE T1562.001)
-Reloads a pristine copy of `ntdll.dll` from disk (`%SystemRoot%\System32\ntdll.dll`) into memory, locates the `.text` executable code section, and overwrites the in-memory hooked `.text` section. This strips all inline `JMP` hooks placed by AV/EDR sensors (e.g. Defender, CrowdStrike).
-
-### 4. Direct System Calls (`direct_syscalls.c` & `syscalls/syswhispers3.h` - MITRE T1106)
-Dynamically parses `ntdll.dll`'s Export Address Table (EAT) and sorts `Zw*` routines by RVA (HalosGate / SysWhispers3 technique) to discover System Service Numbers (SSNs) on the fly without hardcoded tables. Invokes direct kernel `syscall` stubs from our own executable space, completely bypassing userland hooks even if EDR attempts to re-hook APIs.
-
-### 5. Thread Execution Hijacking (`thread_hijack.c` - MITRE T1055.003)
-Enumerate existing threads in a trusted process (e.g. `explorer.exe`), suspends the thread, reads its `CONTEXT`, saves the original instruction pointer (`RIP`), writes the shellcode with an auto-restoring return trampoline, redirects `RIP`, and resumes. Because no new thread is created (`CreateRemoteThread`), kernel thread creation callbacks (`PsSetCreateThreadNotifyRoutine`) are never triggered.
-
-### 6. BYOVD — Bring Your Own Vulnerable Driver (`byovd_demo.c` - MITRE T1068)
-Loads a signed driver (`RTCore64.sys`) with an arbitrary kernel read/write primitive to zero out EDR callback arrays (`PsSetCreateProcessNotifyRoutine`, `ObRegisterCallbacks`) directly in Ring-0 kernel space.
-
-### 7. Polymorphic Engine (`polymorphic.py` - MITRE T1027)
-XOR string encryption with dynamic random keys + junk code and NOP interleaving + identifier scrambling + CFG flattening → produces a totally different SHA-256 hash on every single build.
-
-### 8. LLVM Compiler Frontend (`llvm_compiler.py`)
-Compiles JOCKY forensic scripts directly into LLVM Intermediate Representation (IR) with randomized optimization passes → unique binary machine code per compilation. Signature-based AV cannot match byte patterns.
+### C. Universal Multi-Platform Engine
+1. **Polymorphic Engine (`polymorphic.py` - MITRE T1027)**:
+   XOR string encryption with dynamic random keys + junk code interleaving + identifier scrambling + CFG flattening → produces unique cryptographic hashes (SHA-256) per build.
+2. **LLVM IR Cross-Compiler (`llvm_compiler.py`)**:
+   Compiles JOCKY scripts to LLVM IR with randomized optimization passes and emits native machine code for both `x86_64-pc-windows-msvc` and `x86_64-unknown-linux-gnu`.
 
 ---
 

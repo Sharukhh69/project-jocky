@@ -649,6 +649,34 @@ body {
 .co-hash { color: var(--teal); }
 
 /* Stealth status */
+.stealth-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.st-tab {
+  flex: 1;
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--trans);
+}
+.st-tab:hover {
+  color: var(--text-1);
+  border-color: var(--cyan);
+}
+.st-tab.active {
+  background: rgba(0, 201, 255, 0.12);
+  color: var(--cyan);
+  border-color: var(--cyan);
+  box-shadow: 0 0 8px rgba(0, 201, 255, 0.2);
+}
 .stealth-status { display: flex; flex-direction: column; gap: 6px; }
 .stealth-item {
   display: flex; align-items: center; gap: 8px;

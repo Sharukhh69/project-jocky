@@ -673,6 +673,27 @@ function wireEvents() {
   });
 }
 
+// ── STEALTH PLATFORM SWITCHER ─────────────────────────────────────────────
+function switchStealthPlatform(platform) {
+  const winTab = $('tabWinStealth');
+  const linTab = $('tabLinuxStealth');
+  const winList = $('stealthListWin');
+  const linList = $('stealthListLinux');
+
+  if (platform === 'win') {
+    winTab.classList.add('active');
+    linTab.classList.remove('active');
+    winList.style.display = 'flex';
+    linList.style.display = 'none';
+  } else {
+    linTab.classList.add('active');
+    winTab.classList.remove('active');
+    winList.style.display = 'none';
+    linList.style.display = 'flex';
+  }
+}
+window.switchStealthPlatform = switchStealthPlatform;
+
 // ── INIT ──────────────────────────────────────────────────────────────────
 async function initApp() {
   wireEvents();

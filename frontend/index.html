@@ -227,8 +227,14 @@
 
       <!-- Stealth Status -->
       <div class="rp-block">
-        <div class="sidebar-label">STEALTH ENGINE STATUS</div>
-        <div class="stealth-status">
+        <div class="sidebar-label">STEALTH ENGINE STATUS (CROSS-PLATFORM)</div>
+        <div class="stealth-tabs">
+          <button class="st-tab active" id="tabWinStealth" onclick="switchStealthPlatform('win')">🪟 WINDOWS x64</button>
+          <button class="st-tab" id="tabLinuxStealth" onclick="switchStealthPlatform('linux')">🐧 UBUNTU / LINUX</button>
+        </div>
+
+        <!-- Windows Stealth Suite -->
+        <div class="stealth-status" id="stealthListWin">
           <div class="stealth-item" id="stealthSyscalls">
             <span class="stealth-icon">⚡</span>
             <span>Direct Syscalls (SysWhispers3)</span>
@@ -236,7 +242,7 @@
           </div>
           <div class="stealth-item" id="stealthAPIUnhook">
             <span class="stealth-icon">🔓</span>
-            <span>API Unhooking</span>
+            <span>API Unhooking (ntdll.dll)</span>
             <span class="stealth-badge active">ACTIVE</span>
           </div>
           <div class="stealth-item" id="stealthHollow">
@@ -259,6 +265,39 @@
             <span>BYOVD (Kernel EDR Kill)</span>
             <span class="stealth-badge demo">DEMO</span>
           </div>
+        </div>
+
+        <!-- Linux / Ubuntu Stealth Suite -->
+        <div class="stealth-status" id="stealthListLinux" style="display:none;">
+          <div class="stealth-item" id="stealthLinuxSyscalls">
+            <span class="stealth-icon">⚡</span>
+            <span>Raw Linux Syscalls (No libc)</span>
+            <span class="stealth-badge active">ACTIVE</span>
+          </div>
+          <div class="stealth-item" id="stealthLinuxUnhook">
+            <span class="stealth-icon">🔓</span>
+            <span>libc.so.6 Unhook & LD_PRELOAD Strip</span>
+            <span class="stealth-badge active">ACTIVE</span>
+          </div>
+          <div class="stealth-item" id="stealthLinuxHollow">
+            <span class="stealth-icon">👻</span>
+            <span>ptrace + /proc/self/mem Hollow</span>
+            <span class="stealth-badge demo">DEMO</span>
+          </div>
+          <div class="stealth-item" id="stealthLinuxMemfd">
+            <span class="stealth-icon">💉</span>
+            <span>memfd_create Fileless Exec</span>
+            <span class="stealth-badge active">ACTIVE</span>
+          </div>
+          <div class="stealth-item" id="stealthLinuxPtrace">
+            <span class="stealth-icon">🧵</span>
+            <span>Process Context Hijack</span>
+            <span class="stealth-badge demo">DEMO</span>
+          </div>
+        </div>
+
+        <!-- Shared Core Engines -->
+        <div class="stealth-status" style="margin-top:6px;">
           <div class="stealth-item" id="stealthPoly">
             <span class="stealth-icon">🧬</span>
             <span>Polymorphic Engine</span>
@@ -266,7 +305,7 @@
           </div>
           <div class="stealth-item" id="stealthLLVM">
             <span class="stealth-icon">⚙</span>
-            <span>LLVM IR Compiler</span>
+            <span>LLVM Cross-Compiler (Win & Lin)</span>
             <span class="stealth-badge active">ACTIVE</span>
           </div>
         </div>
