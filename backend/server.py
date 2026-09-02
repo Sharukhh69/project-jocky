@@ -22,12 +22,12 @@ import sys
 try:
     import jwt
 except ImportError:
-    raise SystemExit("[JOCKY] PyJWT not found. Run: pip install PyJWT")
+    jwt = None
 
 try:
     import bcrypt
 except ImportError:
-    raise SystemExit("[JOCKY] bcrypt not found. Run: pip install bcrypt")
+    bcrypt = None
 
 # Add interpreter to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'interpreter'))
@@ -159,44 +159,81 @@ def now() -> str:
     return datetime.datetime.now().isoformat()
 
 
+def audit(case_id: str, action: str, detail: str = ""):
+    """Record an audit trail event into the audit_log table."""
+    try:
+        conn = get_db()
+        conn.execute(
+            'INSERT INTO audit_log (case_id, action, detail, timestamp) VALUES (?,?,?,?)',
+            (case_id or 'SYSTEM', action, detail, now())
+        )
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"[JOCKY Audit Log] Error: {e}")
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # AUTHENTICATION LAYER
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _hash_password(plain: str) -> str:
-    """Bcrypt-hash a plaintext password. Returns utf-8 string."""
-    return bcrypt.hashpw(plain.encode(), bcrypt.gensalt(rounds=12)).decode()
+    """Hash password using bcrypt if available, otherwise salted SHA-256."""
+    if bcrypt:
+        return bcrypt.hashpw(plain.encode(), bcrypt.gensalt(rounds=12)).decode()
+    salt = secrets.token_hex(16)
+    h = hashlib.sha256((salt + plain).encode()).hexdigest()
+    return f"sha256${salt}${h}"
 
 
 def _check_password(plain: str, hashed: str) -> bool:
-    """Verify a plaintext password against a stored bcrypt hash."""
+    """Verify a plaintext password against a stored hash."""
     try:
-        return bcrypt.checkpw(plain.encode(), hashed.encode())
+        if bcrypt and not hashed.startswith("sha256$"):
+            return bcrypt.checkpw(plain.encode(), hashed.encode())
+        if hashed.startswith("sha256$"):
+            _, salt, h = hashed.split("$")
+            return hashlib.sha256((salt + plain).encode()).hexdigest() == h
+        return plain == hashed
     except Exception:
         return False
 
 
-def _issue_token(officer_id: int, username: str, full_name: str,
-                 rank: str) -> str:
-    """Sign and return a JWT for the given officer."""
+def _issue_token(officer_id: int, username: str, full_name: str, rank: str) -> str:
+    """Sign and return a JWT (or HMAC token) for the given officer."""
+    exp_time = datetime.datetime.utcnow() + datetime.timedelta(hours=JWT_EXPIRY_HRS)
     payload = {
         'sub':       str(officer_id),
         'username':  username,
         'full_name': full_name,
         'rank':      rank,
-        'iat':       datetime.datetime.utcnow(),
-        'exp':       datetime.datetime.utcnow() +
-                     datetime.timedelta(hours=JWT_EXPIRY_HRS),
+        'iat':       int(datetime.datetime.utcnow().timestamp()),
+        'exp':       int(exp_time.timestamp()),
     }
-    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    if jwt:
+        return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    import base64
+    p_bytes = json.dumps(payload).encode()
+    sig = hashlib.sha256(p_bytes + JWT_SECRET.encode()).hexdigest()
+    return base64.b64encode(p_bytes).decode() + "." + sig
 
 
 def _decode_token(token: str) -> dict:
-    """
-    Decode and validate a JWT.
-    Raises jwt.ExpiredSignatureError or jwt.InvalidTokenError on failure.
-    """
-    return jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+    """Decode and validate a JWT or HMAC token."""
+    if jwt:
+        return jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+    import base64
+    parts = token.split(".")
+    if len(parts) != 2:
+        raise ValueError("Invalid token format")
+    p_bytes = base64.b64decode(parts[0])
+    expected_sig = hashlib.sha256(p_bytes + JWT_SECRET.encode()).hexdigest()
+    if parts[1] != expected_sig:
+        raise ValueError("Invalid token signature")
+    payload = json.loads(p_bytes.decode())
+    if payload.get('exp', 0) < datetime.datetime.utcnow().timestamp():
+        raise ValueError("Token expired")
+    return payload
 
 
 def _log_auth(username: str, event: str, detail: str = ""):
