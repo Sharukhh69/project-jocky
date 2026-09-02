@@ -1,0 +1,110 @@
+name: JOCKY Forensic Framework — CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master, dev ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  # ───────────────────────────────────────────────────────────────────────────
+  # STAGE 1: AUTOMATED CONTINUOUS INTEGRATION (CI) — TESTING & VERIFICATION
+  # ───────────────────────────────────────────────────────────────────────────
+  test:
+    name: Test & Verify (${{ matrix.os }} - Py ${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ['3.9', '3.10', '3.11']
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Test Suite (Lexer, Parser, IR, Interpreter, Server & Agent)
+        run: |
+          python tests/test_pipeline.py
+
+      - name: Test JOCKY Compiler with CFG Alteration Passes
+        working-directory: ./interpreter
+        run: |
+          python jockyc.py forensics_demo.jky -v
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # STAGE 2: CONTINUOUS DELIVERY & PACKAGING (CD)
+  # ───────────────────────────────────────────────────────────────────────────
+  package-and-deploy:
+    name: Package & Release Artifacts
+    needs: test
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Generate Checksums & Agent Bundle
+        run: |
+          mkdir -p dist/agent dist/server dist/frontend
+
+          # 1. Package Agent
+          cp agent/agent.py dist/agent/
+          cp requirements.txt dist/agent/
+          sha256sum agent/agent.py > dist/agent/agent.sha256
+
+          # 2. Package Backend Server
+          cp backend/server.py dist/server/
+          cp -r interpreter dist/server/
+          cp -r reports dist/server/
+          cp requirements.txt dist/server/
+
+          # 3. Package Frontend Dashboard
+          cp -r frontend/* dist/frontend/
+
+          # 4. Create ZIP distribution packages
+          cd dist
+          zip -r jocky-agent-bundle.zip agent/
+          zip -r jocky-management-server.zip server/ frontend/
+          sha256sum jocky-agent-bundle.zip > jocky-agent-bundle.sha256
+          sha256sum jocky-management-server.zip > jocky-management-server.sha256
+          cd ..
+
+      - name: Upload Agent Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: jocky-agent-bundle
+          path: dist/jocky-agent-bundle.zip
+          retention-days: 14
+
+      - name: Upload Management Server Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: jocky-management-server
+          path: dist/jocky-management-server.zip
+          retention-days: 14
+
+      - name: Trigger Target Agent OTA Fleets (Optional Webhook)
+        if: env.DEPLOY_WEBHOOK_URL != ''
+        env:
+          DEPLOY_WEBHOOK_URL: ${{ secrets.DEPLOY_WEBHOOK_URL }}
+        run: |
+          curl -X POST "$DEPLOY_WEBHOOK_URL" -H "Content-Type: application/json" -d '{"event":"release_published"}' || true

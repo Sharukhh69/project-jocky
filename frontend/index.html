@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JOCKY — Forensic Command Interface</title>
+  <meta name="description" content="JOCKY Forensic Framework — Central Management Interface for Computer & Network Forensic Analysis" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- ── LOADING SCREEN ──────────────────────────────────────────────────────── -->
+<div id="loader" class="loader-screen">
+  <div class="loader-content">
+    <div class="loader-logo">JOCKY</div>
+    <div class="loader-subtitle">FORENSIC FRAMEWORK v1.0.0</div>
+    <div class="loader-bar-wrap">
+      <div class="loader-bar" id="loaderBar"></div>
+    </div>
+    <div class="loader-status" id="loaderStatus">Initializing stealth engine...</div>
+  </div>
+</div>
+
+<!-- ── MAIN APP ───────────────────────────────────────────────────────────── -->
+<div id="app" class="app hidden">
+
+  <!-- ── TOP NAVIGATION ──────────────────────────────────────────────────── -->
+  <header class="topnav">
+    <div class="topnav-left">
+      <div class="logo">
+        <span class="logo-j">J</span><span class="logo-rest">OCKY</span>
+        <span class="logo-tag">FORENSIC</span>
+      </div>
+    </div>
+    <div class="topnav-center">
+      <div class="server-status" id="serverStatusBadge">
+        <span class="status-dot" id="serverDot"></span>
+        <span id="serverStatusText">Connecting...</span>
+      </div>
+    </div>
+    <div class="topnav-right">
+      <div class="nav-info">
+        <span class="nav-time" id="clock"></span>
+        <span class="nav-case" id="activeCaseBadge">No Case Selected</span>
+      </div>
+      <button class="btn btn-outline" id="btnNewCase">+ New Case</button>
+    </div>
+  </header>
+
+  <!-- ── MAIN LAYOUT ─────────────────────────────────────────────────────── -->
+  <div class="layout">
+
+    <!-- ── LEFT SIDEBAR ──────────────────────────────────────────────────── -->
+    <aside class="sidebar">
+
+      <!-- Case Selector -->
+      <div class="sidebar-block">
+        <div class="sidebar-label">ACTIVE CASE</div>
+        <select id="caseSelect" class="select-input">
+          <option value="">— Select Case —</option>
+        </select>
+      </div>
+
+      <!-- Targets -->
+      <div class="sidebar-block">
+        <div class="sidebar-label">
+          TARGET MACHINES
+          <span class="badge" id="targetCount">0</span>
+        </div>
+        <div class="targets-list" id="targetsList">
+          <div class="empty-state">No targets added</div>
+        </div>
+        <button class="btn btn-sm btn-outline" id="btnAddTarget"
+                style="margin-top:8px;width:100%">+ Add Target</button>
+      </div>
+
+      <!-- Quick Commands -->
+      <div class="sidebar-block">
+        <div class="sidebar-label">QUICK COMMANDS</div>
+        <div class="quick-cmds">
+          <button class="qcmd" data-cmd="scan.processes()"
+                  title="List all running processes">
+            <span class="qcmd-icon">⚙</span> scan.processes()
+          </button>
+          <button class="qcmd" data-cmd="scan.network.connections()"
+                  title="Active network connections">
+            <span class="qcmd-icon">🌐</span> scan.network()
+          </button>
+          <button class="qcmd" data-cmd="scan.usb.history()"
+                  title="USB device history">
+            <span class="qcmd-icon">🔌</span> scan.usb.history()
+          </button>
+          <button class="qcmd" data-cmd="scan.logins()"
+                  title="Login event history">
+            <span class="qcmd-icon">👤</span> scan.logins()
+          </button>
+          <button class="qcmd" data-cmd="scan.system()"
+                  title="Full system information">
+            <span class="qcmd-icon">💻</span> scan.system()
+          </button>
+          <button class="qcmd" data-cmd="scan.registry()"
+                  title="Registry persistence keys">
+            <span class="qcmd-icon">🗂</span> scan.registry()
+          </button>
+          <button class="qcmd" data-cmd="scan.files()"
+                  title="File system scan">
+            <span class="qcmd-icon">📁</span> scan.files()
+          </button>
+        </div>
+      </div>
+
+      <!-- Polymorphic Engine -->
+      <div class="sidebar-block">
+        <div class="sidebar-label">POLYMORPHIC ENGINE</div>
+        <button class="btn btn-sm btn-cyber" id="btnMorph"
+                style="width:100%">⚗ Morph Script</button>
+        <div class="morph-hashes" id="morphHashes"></div>
+      </div>
+
+    </aside>
+
+    <!-- ── CENTRE PANEL ───────────────────────────────────────────────────── -->
+    <main class="main-panel">
+
+      <!-- Terminal -->
+      <div class="terminal-wrap">
+        <div class="terminal-header">
+          <div class="terminal-dots">
+            <span class="tdot tdot-red"></span>
+            <span class="tdot tdot-yellow"></span>
+            <span class="tdot tdot-green"></span>
+          </div>
+          <span class="terminal-title">JOCKY Terminal — Command Interface</span>
+          <div class="terminal-actions">
+            <button class="tbtn" id="btnClearTerminal" title="Clear">⌫ Clear</button>
+            <button class="tbtn" id="btnRunAll" title="Run on ALL targets">
+              ⚡ Run on All
+            </button>
+          </div>
+        </div>
+        <div class="terminal-output" id="terminalOutput">
+          <div class="term-line term-sys">
+            <span class="term-prompt">JOCKY</span>
+            <span class="term-text">&nbsp;Framework initialized. Ready for forensic operations.</span>
+          </div>
+          <div class="term-line term-sys">
+            <span class="term-prompt">JOCKY</span>
+            <span class="term-text">&nbsp;Select a case and target machine to begin.</span>
+          </div>
+        </div>
+        <div class="terminal-input-row">
+          <span class="term-input-prompt">jocky&gt;</span>
+          <input type="text" id="terminalInput"
+                 class="term-input"
+                 placeholder="Type JOCKY command or script... (e.g. scan.processes())"
+                 autocomplete="off" spellcheck="false" />
+          <button class="btn btn-cyber" id="btnExecute">▶ Execute</button>
+        </div>
+      </div>
+
+      <!-- Results Panel -->
+      <div class="results-panel" id="resultsPanel">
+        <div class="results-header">
+          <span class="results-title" id="resultTitle">Results</span>
+          <div class="results-actions">
+            <button class="tbtn" id="btnExportJson">⬇ JSON</button>
+            <button class="tbtn" id="btnExportReport">📄 PDF Report</button>
+          </div>
+        </div>
+        <div class="results-body" id="resultsBody">
+          <div class="empty-results">
+            <div class="empty-icon">🔍</div>
+            <div>Run a JOCKY command to see results here.</div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- ── RIGHT PANEL ────────────────────────────────────────────────────── -->
+    <aside class="right-panel">
+
+      <!-- Stats -->
+      <div class="rp-block">
+        <div class="sidebar-label">FORENSIC STATS</div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-val" id="statTargets">0</div>
+            <div class="stat-lbl">Targets</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" id="statEvidence">0</div>
+            <div class="stat-lbl">Evidence</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" id="statCases">0</div>
+            <div class="stat-lbl">Cases</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" id="statOnline">0</div>
+            <div class="stat-lbl">Online</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Evidence Hash Chain -->
+      <div class="rp-block">
+        <div class="sidebar-label">CHAIN OF CUSTODY</div>
+        <div class="hash-chain" id="hashChain">
+          <div class="empty-state">No evidence yet</div>
+        </div>
+      </div>
+
+      <!-- LLVM Compiler Panel -->
+      <div class="rp-block">
+        <div class="sidebar-label">JOCKY LLVM COMPILER</div>
+        <div class="compiler-panel">
+          <button class="btn btn-sm btn-cyber" id="btnCompile"
+                  style="width:100%">⚙ Compile Script</button>
+          <div class="compiler-output" id="compilerOutput">
+            <span class="co-hint">Compile a JOCKY script to see LLVM IR output.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stealth Status -->
+      <div class="rp-block">
+        <div class="sidebar-label">STEALTH ENGINE STATUS</div>
+        <div class="stealth-status">
+          <div class="stealth-item" id="stealthAPIUnhook">
+            <span class="stealth-icon">🔓</span>
+            <span>API Unhooking</span>
+            <span class="stealth-badge demo">DEMO</span>
+          </div>
+          <div class="stealth-item" id="stealthHollow">
+            <span class="stealth-icon">👻</span>
+            <span>Process Hollowing</span>
+            <span class="stealth-badge demo">DEMO</span>
+          </div>
+          <div class="stealth-item" id="stealthBYOVD">
+            <span class="stealth-icon">🛡</span>
+            <span>BYOVD (Kernel)</span>
+            <span class="stealth-badge demo">DEMO</span>
+          </div>
+          <div class="stealth-item" id="stealthPoly">
+            <span class="stealth-icon">🧬</span>
+            <span>Polymorphic Engine</span>
+            <span class="stealth-badge active">ACTIVE</span>
+          </div>
+          <div class="stealth-item" id="stealthLLVM">
+            <span class="stealth-icon">⚙</span>
+            <span>LLVM Compiler</span>
+            <span class="stealth-badge active">ACTIVE</span>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+  </div><!-- /.layout -->
+
+</div><!-- /#app -->
+
+<!-- ── MODALS ─────────────────────────────────────────────────────────────── -->
+
+<!-- New Case Modal -->
+<div class="modal-overlay hidden" id="modalNewCase">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Create New Case</h2>
+      <button class="modal-close" id="closeModalCase">✕</button>
+    </div>
+    <div class="modal-body">
+      <label class="form-label">Case Name</label>
+      <input type="text" id="inputCaseName" class="form-input"
+             placeholder="e.g. Operation Nighthawk" />
+      <label class="form-label">Investigating Officer</label>
+      <input type="text" id="inputOfficer" class="form-input"
+             placeholder="Inspector / Officer Name" />
+      <label class="form-label">Description</label>
+      <textarea id="inputDesc" class="form-input" rows="3"
+                placeholder="Brief case description..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="btnCancelCase">Cancel</button>
+      <button class="btn btn-cyber" id="btnCreateCase">Create Case</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Target Modal -->
+<div class="modal-overlay hidden" id="modalAddTarget">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Add Target Machine</h2>
+      <button class="modal-close" id="closeModalTarget">✕</button>
+    </div>
+    <div class="modal-body">
+      <label class="form-label">Target IP Address</label>
+      <input type="text" id="inputTargetIP" class="form-input"
+             placeholder="192.168.1.101" />
+      <label class="form-label">Port</label>
+      <input type="number" id="inputTargetPort" class="form-input"
+             value="5000" />
+      <label class="form-label">Alias (optional)</label>
+      <input type="text" id="inputTargetName" class="form-input"
+             placeholder="e.g. SUSPECT-LAPTOP-01" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="btnCancelTarget">Cancel</button>
+      <button class="btn btn-cyber" id="btnConfirmTarget">Add Target</button>
+    </div>
+  </div>
+</div>
+
+<!-- Morph Modal -->
+<div class="modal-overlay hidden" id="modalMorph">
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <h2>🧬 Polymorphic Engine</h2>
+      <button class="modal-close" id="closeModalMorph">✕</button>
+    </div>
+    <div class="modal-body">
+      <label class="form-label">JOCKY Script to Morph</label>
+      <textarea id="morphInput" class="form-input mono-input" rows="6"
+                placeholder="scan.processes()&#10;scan.network.connections()&#10;report.send(&quot;dashboard&quot;)"></textarea>
+      <div style="display:flex;gap:12px;margin-top:8px;align-items:center">
+        <label class="form-label" style="margin:0">Builds:</label>
+        <select id="morphBuilds" class="select-input" style="width:80px">
+          <option value="3">3</option>
+          <option value="5">5</option>
+          <option value="10">10</option>
+        </select>
+        <button class="btn btn-cyber" id="btnRunMorph">Run Morphic Engine</button>
+      </div>
+      <div class="morph-result" id="morphResult"></div>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  # Central Management Server (Backend API & Case DB)
+  jocky-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    container_name: jocky-management-server
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - jocky_data:/app/backend
+    environment:
+      - JOCKY_JWT_SECRET=JOCKY-SECURE-SECRET-SIH-2026
+      - JOCKY_REGISTER_KEY=JOCKY-SIH-2026
+
+  # Simulated Target Machine Agent 1
+  jocky-agent-01:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    container_name: jocky-target-agent-01
+    restart: unless-stopped
+    ports:
+      - "5001:5000"
+    environment:
+      - JOCKY_SERVER_URL=http://jocky-server:8000
+    depends_on:
+      - jocky-server
+
+volumes:
+  jocky_data:

@@ -1,0 +1,115 @@
+# forensics_demo.jky — JOCKY Forensic Language Demo Script
+# Demonstrates the full language syntax and stdlib usage.
+
+module forensics_demo
+
+import "sys"
+import "proc"
+import "net"
+import "fs"
+import "crypto"
+import "evasion"
+import "fmt"
+
+# ─── Types ───────────────────────────────────────────────────────────────────
+
+struct Finding {
+    host:     string
+    pid:      int
+    procName: string
+    port:     int
+}
+
+# ─── Helper functions ─────────────────────────────────────────────────────────
+
+func hashSensitive(data: string) : string {
+    raw   := crypto.hash(data)
+    b64   := crypto.base64encode(raw)
+    return b64
+}
+
+@polymorphic
+func gatherProcesses() : string {
+    procs := proc.list()
+    result := ""
+    for p in procs {
+        result += string(p.pid)
+        result += ":"
+        result += p.name
+        result += "\n"
+    }
+    return result
+}
+
+func checkEnvironment() : bool {
+    isDebug   := evasion.checkDebugger()
+    isSandbox := evasion.checkSandbox()
+    isVM      := evasion.antiVM()
+
+    if isDebug || isSandbox || isVM {
+        fmt.println("[!] Hostile environment detected — aborting")
+        return false
+    }
+    return true
+}
+
+func collectNetworkInfo() {
+    # Get hostname
+    host := sys.hostname()
+    fmt.println("[*] Hostname:", host)
+}
+
+func forensicScan() {
+    fmt.println("[*] Starting forensic scan...")
+
+    # Anti-analysis checks
+    safe := checkEnvironment()
+    if !safe {
+        return
+    }
+
+    # Jittered sleep to avoid timing signatures
+    evasion.sleep(150)
+
+    # System info
+    pid  := sys.getpid()
+    host := sys.hostname()
+    os   := sys.os()
+    user := sys.username()
+
+    fmt.println("[*] PID      :", pid)
+    fmt.println("[*] Hostname :", host)
+    fmt.println("[*] OS       :", os)
+    fmt.println("[*] User     :", user)
+
+    # Process enumeration
+    fmt.println("[*] Enumerating processes...")
+    procDump := gatherProcesses()
+    encoded  := crypto.base64encode(procDump)
+    fmt.println("[*] Process dump (b64):", encoded)
+
+    # File system check
+    homeExists := fs.exists("/")
+    fmt.println("[*] Root exists:", homeExists)
+
+    # Network info
+    collectNetworkInfo()
+
+    fmt.println("[+] Scan complete.")
+}
+
+# ─── Entry Point ──────────────────────────────────────────────────────────────
+
+func main() {
+    fmt.println("=============================================")
+    fmt.println("  JOCKY Forensic Engine — Demo")
+    fmt.println("=============================================")
+
+    # Run in a goroutine (lightweight concurrency)
+    go forensicScan()
+
+    # Wait a moment for goroutine to complete
+    evasion.sleep(3000)
+
+    fmt.println("[*] Main thread done.")
+}

@@ -1,0 +1,30 @@
+# Dockerfile.server — JOCKY Central Management Console
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    python3-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install python packages
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application files
+COPY backend/ ./backend/
+COPY interpreter/ ./interpreter/
+COPY reports/ ./reports/
+COPY agent/ ./agent/
+COPY frontend/ ./frontend/
+
+EXPOSE 8000
+
+ENV PYTHONUNBUFFERED=1
+ENV FLASK_ENV=production
+
+WORKDIR /app/backend
+CMD ["python", "server.py"]
