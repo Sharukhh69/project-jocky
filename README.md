@@ -151,8 +151,8 @@ report.export("pdf")
    Dynamically parses `ntdll.dll`'s Export Address Table (EAT) and sorts `Zw*` routines by RVA (HalosGate / SysWhispers3 technique) to resolve System Service Numbers (SSNs) on the fly. Invokes direct kernel `syscall` stubs from our own executable space, completely bypassing userland hooks.
 5. **Thread Execution Hijacking (`thread_hijack.c` - MITRE T1055.003)**:
    Enumerates existing threads in a trusted process (e.g. `explorer.exe`), suspends the thread, reads its `CONTEXT`, saves the original instruction pointer (`RIP`), writes the shellcode with an auto-restoring return trampoline, redirects `RIP`, and resumes. Kernel thread creation callbacks (`PsSetCreateThreadNotifyRoutine`) remain completely silent.
-6. **BYOVD — Bring Your Own Vulnerable Driver (`byovd_demo.c` - MITRE T1068)**:
-   Loads signed `RTCore64.sys` driver to exploit arbitrary kernel read/write primitives, zeroing out EDR kernel callback arrays (`PsSetCreateProcessNotifyRoutine`, `ObRegisterCallbacks`) at Ring-0.
+6. **In-Memory Fileless Execution Architecture (PS 26148 Choice - Primary)**:
+   Per Problem Statement 26148's specification: *"multi-vector in-memory execution via native components OR Bring your own vulnerable driver (BYOVD) techniques"*, JOCKY explicitly utilizes **Multi-Vector In-Memory Execution (Option A)**. BYOVD attacks risk kernel instability, require invasive driver loading, and can trigger Blue Screen of Death (BSOD) crashes that destroy forensic evidence. By operating 100% in-memory via Process Hollowing, Reflective DLL, SysWhispers3 Syscalls, and Thread Context Hijacking, JOCKY preserves court-admissible forensic integrity with zero kernel instability.
 
 ### B. Ubuntu / Linux Stealth Suite
 1. **Linux Dynamic Linker & libc Unhooking (`linux_unhook.c` - MITRE T1562.001 / T1574.006)**:
