@@ -311,6 +311,45 @@
         </div>
       </div>
 
+      <!-- Cloud Infrastructure & Network Evasion (Domain Fronting + SOCKS5) -->
+      <div class="rp-block">
+        <div class="sidebar-label">NETWORK EVASION (CDN & SOCKS5)</div>
+        <div class="stealth-status">
+          <div class="stealth-item" id="netDomainFront">
+            <span class="stealth-icon">☁️</span>
+            <div>
+              <div style="font-weight:600;">Domain Fronting (CDN)</div>
+              <div style="font-size:0.56rem;color:var(--text-3);">SNI: cloudflare.com &rarr; jocky-c2</div>
+            </div>
+            <span class="stealth-badge active">ACTIVE</span>
+          </div>
+          <div class="stealth-item" id="netOriginShield">
+            <span class="stealth-icon">🛡️</span>
+            <div>
+              <div style="font-weight:600;">Origin IP Shield</div>
+              <div style="font-size:0.56rem;color:var(--text-3);">C2 IP Masked by Cloudflare</div>
+            </div>
+            <span class="stealth-badge active">PROTECTED</span>
+          </div>
+          <div class="stealth-item" id="netSocks5">
+            <span class="stealth-icon">🧦</span>
+            <div>
+              <div style="font-weight:600;">SOCKS5 Tunnel (RFC 1928)</div>
+              <div style="font-size:0.56rem;color:var(--text-3);">127.0.0.1:1080 (No Auth)</div>
+            </div>
+            <span class="stealth-badge active">TUNNEL</span>
+          </div>
+        </div>
+        <div style="display:flex; gap:6px; margin-top:8px;">
+          <button class="btn btn-sm btn-cyber" id="btnTestDomainFront" style="flex:1; font-size:0.6rem;" title="Test Cloudflare CDN Domain Fronting">
+            ☁️ Test CDN Front
+          </button>
+          <button class="btn btn-sm btn-cyber" id="btnTestSocks5" style="flex:1; font-size:0.6rem;" title="Test SOCKS5 Encapsulated Tunnel">
+            🧦 Test SOCKS5
+          </button>
+        </div>
+      </div>
+
     </aside>
   </div><!-- /.layout -->
 

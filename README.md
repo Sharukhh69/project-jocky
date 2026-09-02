@@ -14,7 +14,8 @@ JOCKY is a proprietary forensic programming language and framework for digital f
 4. **Stealth Engine** — Process hollowing, API unhooking, direct syscalls (SysWhispers3), BYOVD
 5. **Cross-Platform Agent** — Flask-based agent supporting Windows and Linux forensic scans
 6. **Central Management Interface** — Full dashboard UI with multi-target support
-7. **Evidence + Reports** — SHA-256 chain of custody, court-admissible PDF reports
+8. **Cloud CDN Routing & SOCKS5 Evasion** — Domain fronting via Cloudflare Worker + SOCKS5 RFC 1928 tunnel
+9. **Evidence + Reports** — SHA-256 chain of custody, court-admissible PDF reports
 
 ---
 
@@ -55,8 +56,10 @@ JOCKY/
 ├── interpreter/
 │   ├── jocky_interpreter.py    ← JOCKY language: Lexer → Parser → Executor
 │   ├── polymorphic.py          ← Polymorphic transformation engine
-│   └── llvm_compiler.py        ← LLVM IR compiler frontend (llvmlite)
+│   ├── llvm_compiler.py        ← LLVM IR compiler frontend (llvmlite)
+│   └── jocky_stdlib.py         ← Standard library (Domain Fronting + SOCKS5)
 ├── stealth/
+│   ├── socks5_proxy.py         ← SOCKS5 RFC 1928 network routing daemon
 │   ├── [Windows x64 Stealth Suite]
 │   │   ├── process_hollow.c    ← Process hollowing (C, Windows - MITRE T1055.012)
 │   │   ├── reflective_dll.c    ← Reflective DLL injection (C, Windows - MITRE T1055.001)
@@ -74,6 +77,9 @@ JOCKY/
 │       ├── linux_memfd_exec.c  ← Anonymous in-memory fileless exec via memfd_create (MITRE T1620)
 │       ├── build_linux.sh      ← Ubuntu / Debian automated build script
 │       └── Makefile            ← Linux makefile for stealth compilation
+├── cdn_proxy/
+│   ├── cloudflare_worker.js    ← Cloudflare Worker CDN reverse proxy & domain fronting
+│   └── cdn_edge_simulator.py   ← Local CDN Edge & domain fronting demo server
 ├── backend/
 │   └── server.py               ← Flask backend API (port 8000)
 ├── frontend/
@@ -126,6 +132,9 @@ report.export("pdf")
 | `/api/script/validate` | POST | Validate JOCKY script |
 | `/api/evidence/<case_id>` | GET | Get all evidence for case |
 | `/api/report/<case_id>` | GET | Generate PDF report |
+| `/api/network/evasion` | GET | Cloud CDN & SOCKS5 proxy status |
+| `/api/network/domain_front/test` | GET/POST | Live domain fronting verification test |
+| `/api/network/socks5/test` | GET/POST | SOCKS5 tunnel verification test |
 
 ---
 
@@ -160,6 +169,15 @@ report.export("pdf")
    XOR string encryption with dynamic random keys + junk code interleaving + identifier scrambling + CFG flattening → produces unique cryptographic hashes (SHA-256) per build.
 2. **LLVM IR Cross-Compiler (`llvm_compiler.py`)**:
    Compiles JOCKY scripts to LLVM IR with randomized optimization passes and emits native machine code for both `x86_64-pc-windows-msvc` and `x86_64-unknown-linux-gnu`.
+
+### D. Cloud Infrastructure & Network Evasion (PS 26148 Specific Requirements)
+1. **Domain Fronting via Cloudflare CDN (`cdn_proxy/cloudflare_worker.js` & `cdn_edge_simulator.py` - MITRE T1090.004)**:
+   - **Mechanism**: The agent establishes a TLS session to trusted Cloudflare Anycast IP addresses with TLS SNI set to a benign, whitelisted domain (e.g. `cloudflare.com` or `cdnjs.cloudflare.com`). Network firewalls, EDR network sensors, and DPI classify the traffic as legitimate Cloudflare CDN traffic.
+   - **Internal Routing**: Inside the encrypted TLS tunnel, the inner HTTP `Host` header points to `jocky-c2.workers.dev` (or investigator's Cloudflare route), which un-masks and proxies traffic to the origin management server.
+   - **Anti-Forensic Guarantee**: Firewalls and DPI only ever see trusted CDN connections; the investigator's C2 origin IP is completely concealed.
+2. **SOCKS5 Network Proxy Routing (`stealth/socks5_proxy.py` & `jocky_stdlib.py` - MITRE T1090)**:
+   - **Mechanism**: Implements transparent RFC 1928 SOCKS5 encapsulated network tunneling.
+   - **Evasion**: Avoids standard, direct socket connections that trigger corporate firewall alerts. All telemetry, C2 commands, and evidence streams can be routed through local or remote SOCKS5 proxies (`127.0.0.1:1080`), isolating the client from network inspection.
 
 ---
 

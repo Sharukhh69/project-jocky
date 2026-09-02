@@ -106,6 +106,25 @@ class TestManagementServerAndAgent(unittest.TestCase):
         self.assertGreater(len(dl.data), 1000)
         dl.close()
 
+    def test_09_domain_fronting(self):
+        """Verifies domain fronting routing and origin masking logic."""
+        import server
+        client = server.app.test_client()
+        resp = client.get('/api/network/domain_front/test?front=cloudflare.com')
+        self.assertEqual(resp.status_code, 200)
+        data = resp.get_json()
+        self.assertTrue(data.get("origin_ip_hidden"))
+        self.assertEqual(data.get("tls_sni"), "cloudflare.com")
+
+    def test_10_socks5_tunnel(self):
+        """Verifies SOCKS5 RFC 1928 routing test endpoint."""
+        import server
+        client = server.app.test_client()
+        resp = client.get('/api/network/socks5/test')
+        self.assertEqual(resp.status_code, 200)
+        data = resp.get_json()
+        self.assertIn(data.get("status"), ("success", "standby"))
+
 
 if __name__ == '__main__':
     unittest.main()
