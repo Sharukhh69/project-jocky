@@ -713,12 +713,48 @@ function wireEvents() {
   $('closeModalPackets').addEventListener('click', () => closeModal('modalPacketInspect'));
   $('btnClosePacketModal').addEventListener('click', () => closeModal('modalPacketInspect'));
 
+  // Theme toggle (Light / Dark)
+  initTheme();
+  $('btnThemeToggle').addEventListener('click', toggleTheme);
+
   // Click outside modal to close
   document.querySelectorAll('.modal-overlay').forEach(overlay => {
     overlay.addEventListener('click', e => {
       if (e.target === overlay) overlay.classList.add('hidden');
     });
   });
+}
+
+// ── THEME MANAGEMENT ───────────────────────────────────────────────────────
+function initTheme() {
+  const saved = localStorage.getItem('jocky_theme') || 'dark';
+  applyTheme(saved);
+}
+
+function toggleTheme() {
+  const isLight = document.documentElement.classList.contains('light');
+  const next = isLight ? 'dark' : 'light';
+  applyTheme(next);
+  localStorage.setItem('jocky_theme', next);
+  toast(`Theme switched to ${next.toUpperCase()}`, 'info');
+}
+
+function applyTheme(theme) {
+  const html = document.documentElement;
+  const icon = $('themeIcon');
+  const label = $('themeLabel');
+
+  if (theme === 'light') {
+    html.classList.remove('dark');
+    html.classList.add('light');
+    if (icon) icon.innerHTML = '<use href="#icon-moon"></use>';
+    if (label) label.textContent = 'Dark';
+  } else {
+    html.classList.remove('light');
+    html.classList.add('dark');
+    if (icon) icon.innerHTML = '<use href="#icon-sun"></use>';
+    if (label) label.textContent = 'Light';
+  }
 }
 
 // ── STEALTH PLATFORM SWITCHER ─────────────────────────────────────────────

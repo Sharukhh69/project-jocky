@@ -59,6 +59,10 @@
     <g id="icon-search"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></g>
     <!-- Git Branch / Polymorphic -->
     <g id="icon-branch"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></g>
+    <!-- Sun (Light Theme) -->
+    <g id="icon-sun"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></g>
+    <!-- Moon (Dark Theme) -->
+    <g id="icon-moon"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></g>
   </defs>
 </svg>
 
@@ -100,6 +104,10 @@
       <button class="btn btn-outline btn-sm" id="btnNewCase">
         <svg class="lucide lucide-sm"><use href="#icon-plus"></use></svg>
         <span>New Case</span>
+      </button>
+      <button class="btn-theme-toggle" id="btnThemeToggle" title="Toggle Light / Dark theme">
+        <svg class="lucide lucide-sm" id="themeIcon"><use href="#icon-sun"></use></svg>
+        <span id="themeLabel">Light</span>
       </button>
     </div>
   </header>
