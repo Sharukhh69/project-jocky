@@ -128,18 +128,30 @@ def scan_processes():
 
 @app.route('/scan/network')
 def scan_network():
-    """List all active network connections."""
+    """List all active network connections with process names."""
+    # Cache PID -> process name for fast lookup
+    pid_map = {}
+    for p in psutil.process_iter(['pid', 'name']):
+        try:
+            pid_map[p.info['pid']] = p.info['name']
+        except Exception:
+            pass
+
+    import socket
     connections = []
     for conn in psutil.net_connections(kind='inet'):
         try:
+            pname = pid_map.get(conn.pid, "System" if conn.pid == 4 else ("Idle" if conn.pid == 0 else "Unknown"))
+            proto = "TCP" if getattr(conn, 'type', 1) == socket.SOCK_STREAM else "UDP"
+            laddr = f"{conn.laddr.ip}:{conn.laddr.port}" if conn.laddr else "0.0.0.0:*"
+            raddr = f"{conn.raddr.ip}:{conn.raddr.port}" if (conn.raddr and getattr(conn.raddr, 'ip', None)) else "*:*"
             connections.append({
-                'local_addr':  f"{conn.laddr.ip}:{conn.laddr.port}"
-                               if conn.laddr else "N/A",
-                'remote_addr': f"{conn.raddr.ip}:{conn.raddr.port}"
-                               if conn.raddr else "N/A",
-                'status':      conn.status,
-                'pid':         conn.pid,
-                'type':        'TCP' if conn.type.name == 'SOCK_STREAM' else 'UDP',
+                'process_name': pname,
+                'pid':          conn.pid or 0,
+                'protocol':     proto,
+                'local_addr':   laddr,
+                'remote_addr':  raddr,
+                'status':       conn.status or "ESTABLISHED",
             })
         except Exception:
             pass
