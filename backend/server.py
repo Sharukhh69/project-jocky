@@ -677,9 +677,17 @@ ROUTE_MAP = {
 def execute_on_target(case_id: str, target_ip: str, target_port: int,
                       command: str) -> dict:
     clean_cmd = command.strip()
-    route = ROUTE_MAP.get(clean_cmd)
+    route = None
+    import re, urllib.parse
+    m = re.match(r'^([\w\.]+)\s*\(\s*["\']?(.*?)["\']?\s*\)$', clean_cmd)
+    if m:
+        base_fn = m.group(1) + "()"
+        arg_val = m.group(2).strip()
+        if base_fn in ROUTE_MAP:
+            route = ROUTE_MAP[base_fn]
+            if arg_val and "scan.files" in base_fn:
+                route += f"?path={urllib.parse.quote(arg_val)}"
     if not route:
-        # Match commands with or without parentheses e.g. scan.processes vs scan.processes()
         for k, v in ROUTE_MAP.items():
             if k.rstrip("()") == clean_cmd.rstrip("()"):
                 route = v
