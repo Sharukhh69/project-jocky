@@ -132,31 +132,51 @@ def scan_network():
 
 @app.route('/scan/files')
 def scan_files():
-    """Scan a directory path for files (default: home dir)."""
-    path = request.args.get('path', os.path.expanduser('~'))
+    """Scan a directory path for files (default: home dir + Desktop & Downloads)."""
+    raw_path = request.args.get('path', '')
+    if not raw_path:
+        target_dirs = [
+            os.path.expanduser('~'),
+            os.path.join(os.path.expanduser('~'), 'Desktop'),
+            os.path.join(os.path.expanduser('~'), 'Downloads'),
+            os.path.join(os.path.expanduser('~'), 'Documents')
+        ]
+    else:
+        target_dirs = [raw_path]
+
     file_list = []
-    try:
-        for entry in os.scandir(path):
-            try:
-                stat = entry.stat()
-                file_list.append({
-                    'name':     entry.name,
-                    'path':     entry.path,
-                    'is_dir':   entry.is_dir(),
-                    'size_kb':  round(stat.st_size / 1024, 2),
-                    'modified': datetime.datetime.fromtimestamp(
-                        stat.st_mtime).isoformat(),
-                })
-            except PermissionError:
-                pass
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    seen_paths = set()
+    for p in target_dirs:
+        if not os.path.exists(p):
+            continue
+        try:
+            for entry in os.scandir(p):
+                if entry.path in seen_paths:
+                    continue
+                seen_paths.add(entry.path)
+                try:
+                    stat = entry.stat()
+                    ftype = 'Folder' if entry.is_dir() else (entry.name.split('.')[-1].upper() + ' File' if '.' in entry.name else 'File')
+                    file_list.append({
+                        'name':      entry.name,
+                        'type':      ftype,
+                        'size_kb':   round(stat.st_size / 1024, 2) if not entry.is_dir() else 0.0,
+                        'modified':  datetime.datetime.fromtimestamp(stat.st_mtime).strftime('%Y-%m-%d %H:%M:%S'),
+                        'path':      entry.path,
+                    })
+                except PermissionError:
+                    pass
+        except Exception:
+            pass
+
+    # Sort files first so files appear prominently before folders
+    file_list.sort(key=lambda x: (1 if x['type'] == 'Folder' else 0, x['name'].lower()))
 
     result = {
         "os": OS_TYPE,
         "hostname": HOSTNAME,
         "scan": "files",
-        "path": path,
+        "path": raw_path or os.path.expanduser('~'),
         "count": len(file_list),
         "timestamp": timestamp(),
         "results": file_list
