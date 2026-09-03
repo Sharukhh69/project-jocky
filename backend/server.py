@@ -521,22 +521,27 @@ def audit(case_id: str, action: str, detail: str = ""):
     conn.close()
 
 def check_target(ip: str, port: int) -> dict:
-    # If the user typed 127.0.0.1 or localhost, check container hostname first
-    candidate_ips = [ip]
+    candidate_endpoints = [(ip, port)]
     if ip in ("127.0.0.1", "localhost"):
-        candidate_ips = ["jocky-agent-01", "host.docker.internal", ip]
+        candidate_endpoints = [
+            (ip, port),
+            ("127.0.0.1", port),
+            ("localhost", port),
+            ("jocky-agent-01", 5000),
+            ("host.docker.internal", port)
+        ]
 
-    for cand_ip in candidate_ips:
+    for cand_ip, cand_port in candidate_endpoints:
         try:
-            cand_port = 5000 if cand_ip == "jocky-agent-01" else port
             r = req.get(f"http://{cand_ip}:{cand_port}/ping", timeout=2)
-            data = r.json()
-            return {"status": "online",
-                    "os": data.get("os", "Linux"),
-                    "hostname": data.get("hostname", cand_ip),
-                    "agent_version": data.get("agent_version", "?"),
-                    "_resolved_ip": cand_ip,
-                    "_resolved_port": cand_port}
+            if r.status_code == 200:
+                data = r.json()
+                return {"status": "online",
+                        "os": data.get("os", "Linux"),
+                        "hostname": data.get("hostname", cand_ip),
+                        "agent_version": data.get("agent_version", "?"),
+                        "_resolved_ip": cand_ip,
+                        "_resolved_port": cand_port}
         except Exception:
             continue
 
@@ -671,20 +676,42 @@ ROUTE_MAP = {
 
 def execute_on_target(case_id: str, target_ip: str, target_port: int,
                       command: str) -> dict:
-    route = ROUTE_MAP.get(command)
+    clean_cmd = command.strip()
+    route = ROUTE_MAP.get(clean_cmd)
+    if not route:
+        # Match commands with or without parentheses e.g. scan.processes vs scan.processes()
+        for k, v in ROUTE_MAP.items():
+            if k.rstrip("()") == clean_cmd.rstrip("()"):
+                route = v
+                break
     if not route:
         return {"error": f"Unknown JOCKY command: {command}"}
 
-    # If inside docker, resolve local addresses to container name
-    actual_ip   = "jocky-agent-01" if target_ip in ("127.0.0.1", "localhost") else target_ip
-    actual_port = 5000 if actual_ip == "jocky-agent-01" else target_port
+    # Resolution order: Try specified target_ip:target_port first!
+    candidate_endpoints = [(target_ip, target_port)]
+    if target_ip in ("127.0.0.1", "localhost"):
+        candidate_endpoints = [
+            ("127.0.0.1", target_port),
+            ("localhost", target_port),
+            ("jocky-agent-01", 5000),
+            ("host.docker.internal", target_port)
+        ]
 
-    url = f"http://{actual_ip}:{actual_port}{route}"
-    try:
-        r       = req.get(url, timeout=15)
-        results = r.json()
-    except Exception as e:
-        results = {"error": str(e)}
+    results = None
+    last_err = None
+    for cand_ip, cand_port in candidate_endpoints:
+        url = f"http://{cand_ip}:{cand_port}{route}"
+        try:
+            r = req.get(url, timeout=12)
+            if r.status_code == 200:
+                results = r.json()
+                break
+        except Exception as e:
+            last_err = e
+            continue
+
+    if results is None:
+        results = {"error": f"Could not reach target agent at {target_ip}:{target_port}: {last_err}"}
 
     results_str = json.dumps(results)
     ehash = hashlib.sha256(
