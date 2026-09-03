@@ -215,7 +215,12 @@ function renderTargets() {
         <div class="target-name">${t.target_name || t.target_ip}</div>
         <div class="target-ip">${t.target_ip}:${t.target_port} &middot; ${t.os || 'Unknown'}</div>
       </div>
-      <span class="status-dot ${t.status === 'online' ? 'online' : 'offline'}"></span>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span class="status-dot ${t.status === 'online' ? 'online' : 'offline'}" title="${t.status}"></span>
+        <button class="btn-remove-target" onclick="event.stopPropagation(); removeTarget('${t.target_ip}')" title="Remove target">
+          &times;
+        </button>
+      </div>
     </div>
   `).join('');
 }
@@ -225,6 +230,24 @@ function selectTarget(ip, port) {
   state.activeTargetPort = port;
   renderTargets();
   termLog(`Target selected: ${ip}:${port}`, 'sys');
+}
+
+async function removeTarget(ip) {
+  if (!state.activeCaseId) return;
+  try {
+    await apiPost('/api/target/remove', {
+      case_id: state.activeCaseId,
+      target_ip: ip
+    });
+    termLog(`Target removed: ${ip}`, 'sys');
+    toast(`Target ${ip} removed`, 'info');
+    if (state.activeTargetIP === ip) {
+      state.activeTargetIP = null;
+    }
+    await loadTargets(state.activeCaseId);
+  } catch (e) {
+    toast(`Failed to remove target: ${e.message}`, 'error');
+  }
 }
 
 async function addTarget(ip, port, name) {

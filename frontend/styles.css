@@ -409,6 +409,23 @@ option {
   font-size: 0.7rem;
   color: var(--muted-foreground);
 }
+.btn-remove-target {
+  background: transparent;
+  border: none;
+  color: var(--muted-foreground);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+  opacity: 0.6;
+}
+.btn-remove-target:hover {
+  color: var(--destructive);
+  background: rgba(239, 68, 68, 0.12);
+  opacity: 1;
+}
 
 /* Quick Commands (Shadcn Ghost Button style) */
 .quick-cmds {

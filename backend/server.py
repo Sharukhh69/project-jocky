@@ -657,6 +657,24 @@ def get_targets(case_id):
     return jsonify({"targets": result})
 
 
+@app.route('/api/target/remove', methods=['POST', 'DELETE'])
+@require_auth
+def remove_target():
+    d = request.json or {}
+    case_id   = d.get('case_id')
+    target_ip = d.get('target_ip')
+    if not case_id or not target_ip:
+        return jsonify({"error": "case_id and target_ip are required"}), 400
+
+    conn = get_db()
+    conn.execute("DELETE FROM targets WHERE case_id=? AND target_ip=?", (case_id, target_ip))
+    conn.commit()
+    conn.close()
+
+    audit(case_id, 'TARGET_REMOVED', f"IP={target_ip}")
+    return jsonify({"status": "success", "removed_ip": target_ip})
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # COMMAND EXECUTION
 # ─────────────────────────────────────────────────────────────────────────────
