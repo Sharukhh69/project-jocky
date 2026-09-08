@@ -864,10 +864,11 @@ option { background: var(--bg-card); color: var(--fg-base); }
    TERMINAL
    ═══════════════════════════════════════════════════════════════════════════ */
 .terminal-wrap {
-  flex: 1;
+  flex: 0 0 220px;
+  min-height: 160px;
+  max-height: 38vh;
   display: flex;
   flex-direction: column;
-  min-height: 240px;
   overflow: hidden;
   background: var(--terminal-bg);
   position: relative;
@@ -1009,7 +1010,8 @@ option { background: var(--bg-card); color: var(--fg-base); }
    RESULTS PANEL
    ═══════════════════════════════════════════════════════════════════════════ */
 .results-panel {
-  height: 46%;
+  flex: 1 1 auto;
+  min-height: 280px;
   display: flex;
   flex-direction: column;
   border-top: 1px solid var(--border-med);
@@ -1044,9 +1046,11 @@ option { background: var(--bg-card); color: var(--fg-base); }
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 14px 18px;
+  padding: 12px 18px;
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  overscroll-behavior: contain;
 }
 
 .empty-results {
@@ -1073,29 +1077,30 @@ option { background: var(--bg-card); color: var(--fg-base); }
 /* Result Stat Cards */
 .result-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   flex-shrink: 0;
 }
 .result-stat-card {
   background: var(--bg-card);
   border: 1px solid var(--border-med);
   border-radius: var(--r-sm);
-  padding: 8px 12px;
+  padding: 6px 12px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 .result-stat-val {
   font-family: var(--font-display);
-  font-size: 1.30rem;
+  font-size: 1.15rem;
   font-weight: 700;
   color: var(--amber);
+  line-height: 1.2;
 }
 .result-stat-lbl {
   font-family: var(--font-sans);
-  font-size: 0.74rem;
+  font-size: 0.70rem;
   font-weight: 700;
   color: var(--fg-subtle);
   text-transform: uppercase;
@@ -1111,8 +1116,10 @@ option { background: var(--bg-card); color: var(--fg-base); }
   border: 1px solid var(--border-med);
   border-radius: var(--r-md);
   box-shadow: var(--shadow-sm);
-  margin-top: 10px;
+  margin-top: 6px;
   box-sizing: border-box;
+  flex: 1 1 auto;
+  min-height: 180px;
 }
 
 /* Data Table */
