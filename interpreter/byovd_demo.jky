@@ -1,0 +1,41 @@
+# byovd_demo.jky — JOCKY BYOVD Forensic Script
+# Demonstrates full BYOVD + stealth forensic workflow.
+# PS 26148 — SIH 2026 | Team Brogrammers
+#
+# Run with:
+#   python -m interpreter.jocky_interpreter interpreter/byovd_demo.jky
+
+# ── Phase 1: Check current BYOVD engine state ──────────────────────────────
+var status = byovd.status()
+debug.log("BYOVD Engine Status queried.")
+debug.log("Driver loaded: " + status)
+
+# ── Phase 2: Load the vulnerable driver into kernel ────────────────────────
+byovd.loadDriver()
+debug.log("RTCore64.sys loaded into kernel via SCM (Ring 0 access ready)")
+
+# ── Phase 3: List all kernel drivers (forensic enumeration) ───────────────
+var drivers = byovd.listDrivers()
+debug.log("Kernel driver enumeration complete.")
+
+# ── Phase 4: Disable EDR callbacks at Ring 0 ──────────────────────────────
+# Zeros PspCreateProcessNotifyRoutine, PspLoadImageNotifyRoutine, ObRegisterCallbacks
+# EDR (Defender, CrowdStrike, etc.) is now completely blind
+byovd.disableEDR()
+debug.log("EDR kernel callbacks zeroed. EDR is blind. JOCKY is invisible.")
+
+# ── Phase 5: Now run stealth forensic scans (EDR cannot see us) ────────────
+scan.processes()
+scan.network.connections()
+scan.usb.history()
+scan.logins()
+scan.system()
+scan.registry()
+
+# ── Phase 6: Unload driver — clean up kernel, leave no trace ──────────────
+byovd.unload()
+debug.log("RTCore64.sys unloaded. SCM service deleted. Kernel fully restored.")
+
+# ── Phase 7: Generate court-admissible PDF evidence report ────────────────
+report.export("pdf")
+debug.log("Court-admissible PDF report generated with SHA-256 chain of custody.")

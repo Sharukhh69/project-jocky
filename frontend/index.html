@@ -7,7 +7,9 @@
   <meta name="description" content="JOCKY Forensic Framework — Management Interface for Computer & Network Forensic Analysis" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" />
   <link rel="stylesheet" href="icons.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -63,6 +65,33 @@
     <g id="icon-sun"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></g>
     <!-- Moon (Dark Theme) -->
     <g id="icon-moon"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></g>
+
+    <!-- Activity / Process monitor waveform (better than cpu for processes) -->
+    <g id="icon-activity"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></g>
+    <!-- Monitor / endpoint machine -->
+    <g id="icon-monitor"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></g>
+    <!-- Folder Search / file system investigation -->
+    <g id="icon-folder-search"><path d="M11 20H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v3"></path><circle cx="17" cy="17" r="3"></circle><path d="m21 21-1.5-1.5"></path></g>
+    <!-- Shuffle / polymorphic morphing randomizer -->
+    <g id="icon-shuffle"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></g>
+    <!-- Fingerprint / forensic evidence identity -->
+    <g id="icon-fingerprint"><path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"></path><path d="M14 13.12c0 2.38 0 6.38-1 8.88"></path><path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"></path><path d="M2 12a10 10 0 0 1 18-6"></path><path d="M2 17h2.5"></path><path d="M20 12a10 10 0 0 1-.18 1.68"></path><path d="M4.32 21h2.5"></path><path d="M7 22.77C8.27 21.77 9 20 9 18.15"></path><path d="M7 2.35C8.27 1.96 9.6 1.76 11 1.76a10 10 0 0 1 8.82 5.24"></path><path d="M2.77 11C2.27 11.93 2 13 2 14"></path></g>
+    <!-- File text / PDF report -->
+    <g id="icon-file-text"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></g>
+    <!-- Radar / packet scanning -->
+    <g id="icon-radar"><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"></path><path d="M4 6h.01"></path><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"></path><path d="M16.24 7.76A6 6 0 1 0 8.23 16.67"></path><path d="M12 18h.01"></path><path d="M17.99 11.66A6 6 0 0 1 15.77 16.67"></path><circle cx="12" cy="12" r="2"></circle><path d="m13.41 10.59 5.66-5.66"></path></g>
+    <!-- Boxes / process hollowing - empty shell containers -->
+    <g id="icon-boxes"><path d="M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z"></path><path d="m7 16.5-4.74-2.85"></path><path d="m7 16.5 5-3"></path><path d="M7 16.5v5.17"></path><path d="M12 13.5V19l3.97 2.38a2 2 0 0 0 2.06 0l3-1.8a2 2 0 0 0 .97-1.71v-3.24a2 2 0 0 0-.97-1.71L17 10.5l-5 3Z"></path><path d="m17 16.5-5-3"></path><path d="m17 16.5 4.74-2.85"></path><path d="M17 16.5v5.17"></path><path d="M7.97 4.42A2 2 0 0 0 7 6.13v4.37l5 3 5-3V6.13a2 2 0 0 0-.97-1.71l-3-1.8a2 2 0 0 0-2.06 0l-3 1.8Z"></path><path d="M12 8 7.26 5.15"></path><path d="m12 8 4.74-2.85"></path><path d="M12 13.5V8"></path></g>
+    <!-- Link / DLL injection (library linking) -->
+    <g id="icon-link"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></g>
+    <!-- Git Merge / thread context flow hijacking -->
+    <g id="icon-git-merge"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M6 21V9a9 9 0 0 0 9 9"></path></g>
+    <!-- Hard Drive / in-memory RAM fileless execution -->
+    <g id="icon-hard-drive"><line x1="22" y1="12" x2="2" y2="12"></line><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path><line x1="6" y1="16" x2="6.01" y2="16"></line><line x1="10" y1="16" x2="10.01" y2="16"></line></g>
+    <!-- Layout Grid (Windows platform - 4 quadrant windows logo style) -->
+    <g id="icon-layout-grid"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect></g>
+    <!-- Globe / CDN internet routing / domain fronting -->
+    <g id="icon-globe"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></g>
   </defs>
 </svg>
 
@@ -88,6 +117,7 @@
         <div class="logo-icon">J</div>
         <span>JOCKY</span>
         <span class="logo-tag">FORENSICS</span>
+        <span class="logo-tag" style="background:var(--teal-dim);border-color:var(--border-teal);color:var(--teal);margin-left:-4px;">SIH 2026</span>
       </div>
     </div>
 
@@ -102,11 +132,11 @@
       <span class="nav-time" id="clock">--:--:--</span>
       <span class="nav-case" id="activeCaseBadge">No Case Selected</span>
       <button class="btn btn-outline btn-sm" id="btnNewCase">
-        <svg class="lucide lucide-sm"><use href="#icon-plus"></use></svg>
+        <i class="fa-solid fa-folder-plus jki jki-sm"></i>
         <span>New Case</span>
       </button>
       <button class="btn-theme-toggle" id="btnThemeToggle" title="Toggle Light / Dark theme">
-        <svg class="lucide lucide-sm" id="themeIcon"><use href="#icon-sun"></use></svg>
+        <i class="fa-solid fa-sun jki jki-sm"></i>
         <span id="themeLabel">Light</span>
       </button>
     </div>
@@ -120,7 +150,7 @@
 
       <!-- Case Selection -->
       <div class="sidebar-block">
-        <div class="sidebar-label">Active Investigation</div>
+        <div class="sidebar-label"><span>Active Investigation</span></div>
         <select id="caseSelect" class="select-input">
           <option value="">&mdash; Select Case &mdash;</option>
         </select>
@@ -136,41 +166,41 @@
           <div class="empty-state">No targets configured</div>
         </div>
         <button class="btn btn-outline btn-sm" id="btnAddTarget" style="width:100%;margin-top:6px;">
-          <svg class="lucide lucide-sm"><use href="#icon-plus"></use></svg>
+          <i class="fa-solid fa-desktop jki jki-sm"></i>
           <span>Add Target</span>
         </button>
       </div>
 
       <!-- Quick Commands (Shadcn Ghost Buttons) -->
       <div class="sidebar-block">
-        <div class="sidebar-label">Forensic Primitives</div>
+        <div class="sidebar-label"><span>Forensic Primitives</span></div>
         <div class="quick-cmds">
           <button class="qcmd" data-cmd="scan.processes()" title="Extract active process tree">
-            <span class="qcmd-icon"><svg class="lucide"><use href="#icon-cpu"></use></svg></span>
+            <span class="qcmd-icon"><i class="fa-solid fa-microchip jki"></i></span>
             <span>scan.processes()</span>
           </button>
           <button class="qcmd" data-cmd="scan.network.connections()" title="Network socket audit">
-            <span class="qcmd-icon"><svg class="lucide"><use href="#icon-network"></use></svg></span>
+            <span class="qcmd-icon"><i class="fa-solid fa-network-wired jki"></i></span>
             <span>scan.network()</span>
           </button>
           <button class="qcmd" data-cmd="scan.usb.history()" title="USB storage artifact history">
-            <span class="qcmd-icon"><svg class="lucide"><use href="#icon-usb"></use></svg></span>
+            <span class="qcmd-icon"><i class="fa-brands fa-usb jki"></i></span>
             <span>scan.usb.history()</span>
           </button>
           <button class="qcmd" data-cmd="scan.logins()" title="Account authentication audit">
-            <span class="qcmd-icon"><svg class="lucide"><use href="#icon-user"></use></svg></span>
+            <span class="qcmd-icon"><i class="fa-solid fa-key jki"></i></span>
             <span>scan.logins()</span>
           </button>
           <button class="qcmd" data-cmd="scan.system()" title="OS and hardware telemetry">
-            <span class="qcmd-icon"><svg class="lucide"><use href="#icon-laptop"></use></svg></span>
+            <span class="qcmd-icon"><i class="fa-solid fa-desktop jki"></i></span>
             <span>scan.system()</span>
           </button>
           <button class="qcmd" data-cmd="scan.registry()" title="Persistence keys and registry">
-            <span class="qcmd-icon"><svg class="lucide"><use href="#icon-database"></use></svg></span>
+            <span class="qcmd-icon"><i class="fa-solid fa-table-list jki"></i></span>
             <span>scan.registry()</span>
           </button>
           <button class="qcmd" data-cmd="scan.files()" title="Volatile file system scan">
-            <span class="qcmd-icon"><svg class="lucide"><use href="#icon-file"></use></svg></span>
+            <span class="qcmd-icon"><i class="fa-solid fa-folder-open jki"></i></span>
             <span>scan.files()</span>
           </button>
         </div>
@@ -178,9 +208,9 @@
 
       <!-- Polymorphic Engine -->
       <div class="sidebar-block">
-        <div class="sidebar-label">Polymorphic Engine</div>
+        <div class="sidebar-label"><span>Polymorphic Engine</span><i class="fa-solid fa-dna jki jki-sm" style="margin-left:auto;"></i></div>
         <button class="btn btn-secondary btn-sm" id="btnMorph" style="width:100%;">
-          <svg class="lucide lucide-sm"><use href="#icon-branch"></use></svg>
+          <i class="fa-solid fa-dna jki jki-sm"></i>
           <span>Generate Polymorphic Builds</span>
         </button>
         <div class="morph-hashes" id="morphHashes" style="margin-top:6px;"></div>
@@ -200,16 +230,28 @@
               <span class="tdot"></span>
               <span class="tdot"></span>
             </div>
-            <span class="terminal-title">jocky-cli &mdash; execution console</span>
+            <span class="terminal-title"><span style="color:var(--amber);font-weight:600;">jocky</span><span style="color:var(--fg-subtle);">@forensic-lab</span></span>
           </div>
           <div class="terminal-actions">
             <button class="btn-ghost" id="btnClearTerminal" title="Clear console">
-              <svg class="lucide lucide-sm"><use href="#icon-trash"></use></svg>
+              <i class="fa-solid fa-trash-can jki jki-sm"></i>
               <span>Clear</span>
             </button>
             <button class="btn-ghost" id="btnRunAll" title="Execute on all target machines">
-              <svg class="lucide lucide-sm"><use href="#icon-zap"></use></svg>
+              <i class="fa-solid fa-bolt jki jki-sm"></i>
               <span>Run on All</span>
+            </button>
+            <button class="btn btn-secondary btn-sm" id="btnSimulateLeak" title="Simulate a realistic insider data leak incident for demo">
+              <i class="fa-solid fa-flask jki jki-sm"></i>
+              <span>Simulate Leak</span>
+            </button>
+            <button class="btn btn-primary btn-sm" id="btnAutoHunt" title="Automated Fleet Threat Hunter — Auto-Scan & Isolate Culprit">
+              <i class="fa-solid fa-wand-magic-sparkles jki jki-sm"></i>
+              <span>Auto-Hunt Fleet</span>
+            </button>
+            <button class="btn-ghost" id="btnMaxTerminal" title="Maximize Console">
+              <i class="fa-solid fa-expand jki jki-sm"></i>
+              <span>Maximize</span>
             </button>
           </div>
         </div>
@@ -222,12 +264,12 @@
         </div>
 
         <div class="terminal-input-row">
-          <span class="term-input-prompt"><svg class="lucide lucide-sm"><use href="#icon-terminal"></use></svg></span>
+          <span class="term-input-prompt"><i class="fa-solid fa-terminal jki jki-sm"></i></span>
           <input type="text" id="terminalInput" class="term-input"
                  placeholder="Enter JOCKY script or primitive (e.g. scan.processes())..."
                  autocomplete="off" spellcheck="false" />
           <button class="btn btn-primary btn-sm" id="btnExecute">
-            <svg class="lucide lucide-sm"><use href="#icon-play"></use></svg>
+            <i class="fa-solid fa-play jki jki-sm"></i>
             <span>Execute</span>
           </button>
         </div>
@@ -237,25 +279,30 @@
       <div class="results-panel" id="resultsPanel">
         <div class="results-header">
           <span class="results-title" id="resultTitle">
-            <svg class="lucide lucide-sm"><use href="#icon-file"></use></svg>
+            <i class="fa-solid fa-fingerprint jki jki-sm"></i>
             <span>Evidence Output</span>
           </span>
           <div class="results-actions">
-            <button class="btn-ghost" id="btnExportJson">
-              <svg class="lucide lucide-sm"><use href="#icon-download"></use></svg>
+            <button class="btn-ghost" id="btnExportJson" title="Export JSON artifact">
+              <i class="fa-solid fa-file-arrow-down jki jki-sm"></i>
               <span>Export JSON</span>
             </button>
-            <button class="btn-ghost" id="btnExportReport">
-              <svg class="lucide lucide-sm"><use href="#icon-file"></use></svg>
+            <button class="btn-ghost" id="btnExportReport" title="Generate PDF forensic report">
+              <i class="fa-solid fa-file-pdf jki jki-sm"></i>
               <span>PDF Report</span>
+            </button>
+            <button class="btn-ghost" id="btnMaxResults" title="Maximize Evidence Output">
+              <i class="fa-solid fa-expand jki jki-sm"></i>
+              <span>Maximize</span>
             </button>
           </div>
         </div>
 
         <div class="results-body" id="resultsBody">
           <div class="empty-results">
-            <svg class="lucide lucide-lg" style="color:#52525b;"><use href="#icon-search"></use></svg>
-            <span>No forensic artifacts collected yet. Execute a command to populate telemetry.</span>
+            <i class="fa-solid fa-fingerprint jki jki-lg" style="color:var(--fg-muted);"></i>
+            <span>No forensic artifacts collected yet.</span>
+            <span style="font-size:0.7rem;color:var(--fg-muted);font-family:var(--font-mono);">Execute a scan primitive to begin.</span>
           </div>
         </div>
       </div>
@@ -267,21 +314,25 @@
 
       <!-- Stats Grid -->
       <div class="rp-block">
-        <div class="sidebar-label">Session Telemetry</div>
+        <div class="sidebar-label"><span>Session Telemetry</span><span class="badge" style="background:var(--success-dim);color:var(--success);border-color:rgba(74,222,128,0.3);">LIVE</span></div>
         <div class="stats-grid">
           <div class="stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-desktop jki"></i></div>
             <div class="stat-val" id="statTargets">0</div>
             <div class="stat-lbl">Endpoints</div>
           </div>
           <div class="stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-fingerprint jki"></i></div>
             <div class="stat-val" id="statEvidence">0</div>
             <div class="stat-lbl">Artifacts</div>
           </div>
           <div class="stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-folder-open jki"></i></div>
             <div class="stat-val" id="statCases">0</div>
             <div class="stat-lbl">Cases</div>
           </div>
-          <div class="stat-card">
+          <div class="stat-card stat-card--online">
+            <div class="stat-icon"><i class="fa-solid fa-microchip jki"></i></div>
             <div class="stat-val" id="statOnline">0</div>
             <div class="stat-lbl">Online</div>
           </div>
@@ -290,7 +341,7 @@
 
       <!-- Chain of Custody -->
       <div class="rp-block">
-        <div class="sidebar-label">Chain of Custody (SHA-256)</div>
+        <div class="sidebar-label"><span>Chain of Custody</span><span class="badge">SHA-256</span></div>
         <div class="hash-chain" id="hashChain">
           <div class="empty-state">No verification hashes recorded</div>
         </div>
@@ -298,28 +349,28 @@
 
       <!-- LLVM Cross Compiler -->
       <div class="rp-block">
-        <div class="sidebar-label">LLVM Cross-Compiler</div>
+        <div class="sidebar-label"><span>LLVM Cross-Compiler</span><i class="fa-solid fa-code jki jki-sm" style="margin-left:auto;"></i></div>
         <div class="compiler-panel">
           <button class="btn btn-outline btn-sm" id="btnCompile" style="width:100%;">
-            <svg class="lucide lucide-sm"><use href="#icon-code"></use></svg>
+            <i class="fa-solid fa-code jki jki-sm"></i>
             <span>Compile to LLVM IR</span>
           </button>
           <div class="compiler-output" id="compilerOutput">
-            <span style="color:#52525b;">Compile a JOCKY script to view LLVM IR basic blocks.</span>
+            <span style="color:var(--fg-muted);">Compile a JOCKY script to view LLVM IR basic blocks.</span>
           </div>
         </div>
       </div>
 
       <!-- In-Memory Stealth Suite -->
       <div class="rp-block">
-        <div class="sidebar-label">In-Memory Execution Suite</div>
+        <div class="sidebar-label"><span>Execution Suite</span><span class="badge" style="background:var(--teal-dim);color:var(--teal);border-color:var(--border-teal);">STEALTH</span></div>
         <div class="stealth-tabs">
           <button class="st-tab active" id="tabWinStealth" onclick="switchStealthPlatform('win')">
-            <svg class="lucide lucide-sm"><use href="#icon-shield"></use></svg>
+            <i class="fa-brands fa-windows jki jki-sm"></i>
             <span>Windows x64</span>
           </button>
           <button class="st-tab" id="tabLinuxStealth" onclick="switchStealthPlatform('linux')">
-            <svg class="lucide lucide-sm"><use href="#icon-terminal"></use></svg>
+            <i class="fa-brands fa-linux jki jki-sm"></i>
             <span>Ubuntu / Linux</span>
           </button>
         </div>
@@ -328,42 +379,42 @@
         <div class="stealth-status" id="stealthListWin">
           <div class="stealth-item" id="stealthSyscalls">
             <div class="stealth-title-wrap">
-              <svg class="lucide lucide-sm"><use href="#icon-zap"></use></svg>
+              <i class="fa-solid fa-bolt jki jki-sm"></i>
               <span>Direct Syscalls (SysWhispers3)</span>
             </div>
             <span class="stealth-badge active">ACTIVE</span>
           </div>
           <div class="stealth-item" id="stealthAPIUnhook">
             <div class="stealth-title-wrap">
-              <svg class="lucide lucide-sm"><use href="#icon-unlock"></use></svg>
+              <i class="fa-solid fa-link-slash jki jki-sm"></i>
               <span>API Unhooking (ntdll.dll)</span>
             </div>
             <span class="stealth-badge active">ACTIVE</span>
           </div>
           <div class="stealth-item" id="stealthHollow">
             <div class="stealth-title-wrap">
-              <svg class="lucide lucide-sm"><use href="#icon-shield"></use></svg>
+              <i class="fa-solid fa-ghost jki jki-sm"></i>
               <span>Process Hollowing</span>
             </div>
             <span class="stealth-badge demo">LOADED</span>
           </div>
           <div class="stealth-item" id="stealthReflective">
             <div class="stealth-title-wrap">
-              <svg class="lucide lucide-sm"><use href="#icon-file"></use></svg>
+              <i class="fa-solid fa-syringe jki jki-sm"></i>
               <span>Reflective DLL Injection</span>
             </div>
             <span class="stealth-badge demo">LOADED</span>
           </div>
           <div class="stealth-item" id="stealthThreadHijack">
             <div class="stealth-title-wrap">
-              <svg class="lucide lucide-sm"><use href="#icon-cpu"></use></svg>
+              <i class="fa-solid fa-code-fork jki jki-sm"></i>
               <span>Thread Context Hijacking</span>
             </div>
             <span class="stealth-badge demo">LOADED</span>
           </div>
           <div class="stealth-item" id="stealthInMemory">
             <div class="stealth-title-wrap">
-              <svg class="lucide lucide-sm"><use href="#icon-lock"></use></svg>
+              <i class="fa-solid fa-memory jki jki-sm"></i>
               <span>In-Memory RAM Fileless</span>
             </div>
             <span class="stealth-badge active">ACTIVE</span>
@@ -374,28 +425,28 @@
         <div class="stealth-status" id="stealthListLinux" style="display:none;">
           <div class="stealth-item" id="stealthLinuxSyscalls">
             <div class="stealth-title-wrap">
-              <svg class="lucide lucide-sm"><use href="#icon-zap"></use></svg>
+              <i class="fa-solid fa-bolt jki jki-sm"></i>
               <span>Raw Linux Syscalls (No libc)</span>
             </div>
             <span class="stealth-badge active">ACTIVE</span>
           </div>
           <div class="stealth-item" id="stealthLinuxUnhook">
             <div class="stealth-title-wrap">
-              <svg class="lucide lucide-sm"><use href="#icon-unlock"></use></svg>
+              <i class="fa-solid fa-link-slash jki jki-sm"></i>
               <span>libc.so.6 Unhook &amp; LD_PRELOAD</span>
             </div>
             <span class="stealth-badge active">ACTIVE</span>
           </div>
           <div class="stealth-item" id="stealthLinuxHollow">
             <div class="stealth-title-wrap">
-              <svg class="lucide lucide-sm"><use href="#icon-shield"></use></svg>
+              <i class="fa-solid fa-ghost jki jki-sm"></i>
               <span>ptrace + /proc/self/mem Hollow</span>
             </div>
             <span class="stealth-badge demo">LOADED</span>
           </div>
           <div class="stealth-item" id="stealthLinuxMemfd">
             <div class="stealth-title-wrap">
-              <svg class="lucide lucide-sm"><use href="#icon-file"></use></svg>
+              <i class="fa-solid fa-memory jki jki-sm"></i>
               <span>memfd_create Fileless Exec</span>
             </div>
             <span class="stealth-badge active">ACTIVE</span>
@@ -405,34 +456,34 @@
 
       <!-- Network Evasion & CDN Domain Fronting -->
       <div class="rp-block">
-        <div class="sidebar-label">Network Evasion (CDN &amp; SOCKS5)</div>
+        <div class="sidebar-label"><span>Network Evasion</span><span class="badge">CDN · SOCKS5</span></div>
         <div class="stealth-status">
           <div class="stealth-item" id="netDomainFront">
             <div class="stealth-title-wrap">
-              <svg class="lucide lucide-sm"><use href="#icon-cloud"></use></svg>
+              <i class="fa-solid fa-globe jki jki-sm"></i>
               <div>
                 <div>Domain Fronting (CDN)</div>
-                <div style="font-size:0.6rem;color:#71717a;">SNI: cloudflare.com</div>
+                <div style="font-size:0.6rem;color:var(--fg-subtle);">SNI: cloudflare.com</div>
               </div>
             </div>
             <span class="stealth-badge active">ACTIVE</span>
           </div>
           <div class="stealth-item" id="netOriginShield">
             <div class="stealth-title-wrap">
-              <svg class="lucide lucide-sm"><use href="#icon-shield"></use></svg>
+              <i class="fa-solid fa-shield-halved jki jki-sm"></i>
               <div>
                 <div>Origin IP Shield</div>
-                <div style="font-size:0.6rem;color:#71717a;">Anycast Concealment</div>
+                <div style="font-size:0.6rem;color:var(--fg-subtle);">Anycast Concealment</div>
               </div>
             </div>
             <span class="stealth-badge active">SHIELDED</span>
           </div>
           <div class="stealth-item" id="netSocks5">
             <div class="stealth-title-wrap">
-              <svg class="lucide lucide-sm"><use href="#icon-network"></use></svg>
+              <i class="fa-solid fa-network-wired jki jki-sm"></i>
               <div>
                 <div>SOCKS5 (RFC 1928)</div>
-                <div style="font-size:0.6rem;color:#71717a;">127.0.0.1:1080 Tunnel</div>
+                <div style="font-size:0.6rem;color:var(--fg-subtle);">127.0.0.1:1080 Tunnel</div>
               </div>
             </div>
             <span class="stealth-badge active">TUNNEL</span>
@@ -441,19 +492,68 @@
 
         <div style="display:flex;gap:6px;margin-top:6px;">
           <button class="btn btn-outline btn-sm" id="btnTestDomainFront" style="flex:1;" title="Test Cloudflare CDN Domain Fronting">
-            <svg class="lucide lucide-sm"><use href="#icon-cloud"></use></svg>
+            <i class="fa-solid fa-cloud jki jki-sm"></i>
             <span>Test CDN Front</span>
           </button>
           <button class="btn btn-outline btn-sm" id="btnTestSocks5" style="flex:1;" title="Test SOCKS5 Encapsulated Tunnel">
-            <svg class="lucide lucide-sm"><use href="#icon-network"></use></svg>
+            <i class="fa-solid fa-network-wired jki jki-sm"></i>
             <span>Test SOCKS5</span>
           </button>
         </div>
 
         <button class="btn btn-secondary btn-sm" id="btnInspectPackets" style="width:100%;margin-top:6px;" title="View wire-level packets and EDR detection comparison">
-          <svg class="lucide lucide-sm"><use href="#icon-search"></use></svg>
+          <i class="fa-solid fa-satellite-dish jki jki-sm"></i>
           <span>Inspect Wire Packets (EDR View)</span>
         </button>
+      </div>
+
+      <!-- BYOVD Kernel Engine Button -->
+      <div class="rp-block" style="margin-top:10px;">
+        <div class="sidebar-label">
+          <span>Kernel Engine</span>
+          <span class="badge" style="background:rgba(239,68,68,0.15);color:#f87171;border-color:rgba(239,68,68,0.3);">Ring 0</span>
+        </div>
+        <button id="btnOpenByovd" style="
+          width:100%;
+          display:flex;
+          align-items:center;
+          gap:10px;
+          padding:10px 14px;
+          background:linear-gradient(135deg,rgba(239,68,68,0.12),rgba(168,85,247,0.12));
+          border:1px solid rgba(239,68,68,0.4);
+          border-radius:6px;
+          color:#f87171;
+          font-size:0.78rem;
+          font-weight:600;
+          cursor:pointer;
+          transition:all .2s;
+          font-family:var(--font-mono);
+          letter-spacing:.02em;
+          position:relative;
+          overflow:hidden;
+        "
+        onmouseover="this.style.background='linear-gradient(135deg,rgba(239,68,68,0.22),rgba(168,85,247,0.22))';"
+        onmouseout="this.style.background='linear-gradient(135deg,rgba(239,68,68,0.12),rgba(168,85,247,0.12))';"
+        title="Open BYOVD Kernel Engine — Ring 0 EDR Disabler">
+          <i class="fa-solid fa-microchip" style="font-size:1rem;"></i>
+          <div style="text-align:left;">
+            <div>BYOVD Kernel Engine</div>
+            <div style="font-size:0.6rem;color:#a78bfa;font-weight:400;margin-top:1px;">RTCore64.sys · EDR Disabler · Ring 0</div>
+          </div>
+          <span style="
+            margin-left:auto;
+            font-size:0.55rem;
+            background:rgba(239,68,68,0.2);
+            color:#f87171;
+            padding:2px 6px;
+            border-radius:3px;
+            border:1px solid rgba(239,68,68,0.4);
+            animation: pulse-badge 2s infinite;
+          ">ACTIVE</span>
+        </button>
+        <div style="font-size:0.6rem;color:var(--fg-dim);margin-top:5px;text-align:center;">
+          MITRE T1562.001 · BYOVD · PsCreateProcess callbacks
+        </div>
       </div>
 
     </aside>
@@ -469,10 +569,10 @@
   <div class="modal">
     <div class="modal-header">
       <h2>
-        <svg class="lucide"><use href="#icon-file"></use></svg>
+        <i class="fa-solid fa-briefcase jki"></i>
         <span>Create Investigation Case</span>
       </h2>
-      <button class="modal-close" id="closeModalCase"><svg class="lucide"><use href="#icon-close"></use></svg></button>
+      <button class="modal-close" id="closeModalCase"><i class="fa-solid fa-xmark jki"></i></button>
     </div>
     <div class="modal-body">
       <label class="form-label">Case Identifier</label>
@@ -494,10 +594,10 @@
   <div class="modal">
     <div class="modal-header">
       <h2>
-        <svg class="lucide"><use href="#icon-laptop"></use></svg>
+        <i class="fa-solid fa-desktop jki"></i>
         <span>Register Target Endpoint</span>
       </h2>
-      <button class="modal-close" id="closeModalTarget"><svg class="lucide"><use href="#icon-close"></use></svg></button>
+      <button class="modal-close" id="closeModalTarget"><i class="fa-solid fa-xmark jki"></i></button>
     </div>
     <div class="modal-body">
       <label class="form-label">Endpoint IP Address</label>
@@ -519,10 +619,10 @@
   <div class="modal modal-wide">
     <div class="modal-header">
       <h2>
-        <svg class="lucide"><use href="#icon-branch"></use></svg>
+        <i class="fa-solid fa-dna jki"></i>
         <span>Automated Polymorphic Engine</span>
       </h2>
-      <button class="modal-close" id="closeModalMorph"><svg class="lucide"><use href="#icon-close"></use></svg></button>
+      <button class="modal-close" id="closeModalMorph"><i class="fa-solid fa-xmark jki"></i></button>
     </div>
     <div class="modal-body">
       <label class="form-label">Source JOCKY Script</label>
@@ -536,7 +636,7 @@
           <option value="10">10</option>
         </select>
         <button class="btn btn-primary btn-sm" id="btnRunMorph">
-          <svg class="lucide lucide-sm"><use href="#icon-branch"></use></svg>
+          <i class="fa-solid fa-dna jki jki-sm"></i>
           <span>Run Polymorphic Morphing</span>
         </button>
       </div>
@@ -550,10 +650,10 @@
   <div class="modal modal-wide">
     <div class="modal-header">
       <h2>
-        <svg class="lucide"><use href="#icon-search"></use></svg>
+        <i class="fa-solid fa-satellite-dish jki"></i>
         <span>Deep Packet Inspection (DPI) &amp; Wire Comparison</span>
       </h2>
-      <button class="modal-close" id="closeModalPackets"><svg class="lucide"><use href="#icon-close"></use></svg></button>
+      <button class="modal-close" id="closeModalPackets"><i class="fa-solid fa-xmark jki"></i></button>
     </div>
     <div class="modal-body">
       <div style="font-size:0.72rem;color:#a1a1aa;margin-bottom:12px;">
@@ -561,49 +661,264 @@
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <!-- Left: Traditional Script (Blocked) -->
-        <div style="background:#18181b;border:1px solid rgba(239,68,68,0.3);border-radius:4px;padding:12px;">
+        <div style="background:var(--bg-elevated);border:1px solid rgba(251,113,133,0.3);border-radius:4px;padding:12px;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-            <span style="font-weight:600;color:#f87171;">Standard Script</span>
-            <span style="font-size:0.6rem;background:rgba(239,68,68,0.15);color:#f87171;padding:1px 6px;border-radius:2px;font-family:var(--font-mono);">BLOCKED</span>
+            <span style="font-weight:600;color:var(--danger);">Standard Script</span>
+            <span style="font-size:0.6rem;background:var(--danger-dim);color:var(--danger);padding:1px 6px;border-radius:2px;font-family:var(--font-mono);">BLOCKED</span>
           </div>
           <div style="font-family:var(--font-mono);font-size:0.68rem;line-height:1.6;color:#a1a1aa;">
             <div>Src IP: 192.168.1.105 (Host)</div>
-            <div>Dst IP: <span style="color:#f87171;">203.0.113.88:8000</span></div>
+            <div>Dst IP: <span style="color:var(--danger);">203.0.113.88:8000</span></div>
             <div>Protocol: HTTP Cleartext</div>
             <div>TLS SNI: None (Unencrypted)</div>
             <div>Host Header: c2.unknown-attacker.net</div>
-            <div style="margin-top:8px;padding-top:6px;border-top:1px solid #27272a;color:#ef4444;">
+            <div style="margin-top:8px;padding-top:6px;border-top:1px solid var(--border-med);color:var(--danger);">
               Verdict: Blocked (Threat Score: 98/100)
             </div>
           </div>
         </div>
 
         <!-- Right: JOCKY Domain Fronting (Allowed) -->
-        <div style="background:#18181b;border:1px solid rgba(34,197,94,0.3);border-radius:4px;padding:12px;">
+        <div style="background:var(--bg-elevated);border:1px solid rgba(74,222,128,0.3);border-radius:4px;padding:12px;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-            <span style="font-weight:600;color:#4ade80;">JOCKY Domain Fronting</span>
-            <span style="font-size:0.6rem;background:rgba(34,197,94,0.15);color:#4ade80;padding:1px 6px;border-radius:2px;font-family:var(--font-mono);">ALLOWED</span>
+            <span style="font-weight:600;color:var(--success);">JOCKY Domain Fronting</span>
+            <span style="font-size:0.6rem;background:var(--success-dim);color:var(--success);padding:1px 6px;border-radius:2px;font-family:var(--font-mono);">ALLOWED</span>
           </div>
           <div style="font-family:var(--font-mono);font-size:0.68rem;line-height:1.6;color:#a1a1aa;">
             <div>Src IP: 192.168.1.105 (Host)</div>
-            <div>Dst IP: <span style="color:#4ade80;" id="piCloudflareIP">104.16.132.229:443</span></div>
+            <div>Dst IP: <span style="color:var(--success);" id="piCloudflareIP">104.16.132.229:443</span></div>
             <div>Protocol: HTTPS (TLS 1.3 Anycast)</div>
             <div>TLS SNI: cloudflare.com (Whitelisted)</div>
             <div>Cipher: <span id="piCipher">TLS_AES_256_GCM_SHA384</span></div>
-            <div style="margin-top:8px;padding-top:6px;border-top:1px solid #27272a;color:#22c55e;">
+            <div style="margin-top:8px;padding-top:6px;border-top:1px solid var(--border-med);color:var(--success);">
               Verdict: Allowed (Threat Score: 0/100)
             </div>
           </div>
         </div>
       </div>
 
-      <div style="margin-top:12px;background:#09090b;border:1px solid var(--border);border-radius:4px;padding:8px 12px;font-family:var(--font-mono);font-size:0.65rem;">
-        <div style="color:#d4d4d8;margin-bottom:2px;">Live Cloudflare Anycast Gateway:</div>
-        <div><a href="https://jocky-c2.sharukheshs.workers.dev" target="_blank" style="color:#fafafa;text-decoration:underline;">https://jocky-c2.sharukheshs.workers.dev</a></div>
+      <div style="margin-top:12px;background:var(--terminal-bg);border:1px solid var(--border-med);border-radius:4px;padding:8px 12px;font-family:var(--font-mono);font-size:0.65rem;">
+        <div style="color:var(--fg-dim);margin-bottom:2px;">Live Cloudflare Anycast Gateway:</div>
+        <div><a href="https://jocky-c2.sharukheshs.workers.dev" target="_blank" style="color:var(--amber);text-decoration:underline;">https://jocky-c2.sharukheshs.workers.dev</a></div>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline btn-sm" id="btnClosePacketModal">Close Inspector</button>
+    </div>
+  </div>
+</div>
+
+<!-- BYOVD Kernel Engine Modal -->
+<div class="modal-overlay hidden" id="modalByovd">
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <h2>
+        <i class="fa-solid fa-microchip jki"></i>
+        <span>BYOVD Kernel Engine &mdash; Ring 0 EDR Disabler</span>
+      </h2>
+      <button class="modal-close" id="closeModalByovd"><i class="fa-solid fa-xmark jki"></i></button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Status Bar -->
+      <div style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
+        <div style="flex:1;background:var(--bg-elevated);border:1px solid var(--border-med);border-radius:6px;padding:10px 14px;">
+          <div style="font-size:0.62rem;color:var(--fg-dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">Driver (RTCore64.sys)</div>
+          <div id="byovdDriverStatus" style="font-size:0.8rem;font-weight:700;font-family:var(--font-mono);color:var(--fg-dim);">— UNKNOWN —</div>
+        </div>
+        <div style="flex:1;background:var(--bg-elevated);border:1px solid var(--border-med);border-radius:6px;padding:10px 14px;">
+          <div style="font-size:0.62rem;color:var(--fg-dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">EDR Kernel Callbacks</div>
+          <div id="byovdEdrStatus" style="font-size:0.8rem;font-weight:700;font-family:var(--font-mono);color:var(--fg-dim);">— UNKNOWN —</div>
+        </div>
+        <div style="flex:1;background:var(--bg-elevated);border:1px solid var(--border-med);border-radius:6px;padding:10px 14px;">
+          <div style="font-size:0.62rem;color:var(--fg-dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">Technique</div>
+          <div style="font-size:0.72rem;font-family:var(--font-mono);color:var(--amber);">BYOVD — MITRE T1562.001</div>
+        </div>
+      </div>
+
+      <!-- Explanation -->
+      <div style="background:var(--bg-elevated);border-left:3px solid var(--amber);padding:10px 14px;border-radius:4px;font-size:0.72rem;color:var(--fg-dim);margin-bottom:14px;line-height:1.6;">
+        <strong style="color:var(--amber);">How it works:</strong>
+        RTCore64.sys (MSI Afterburner — WHQL signed by Microsoft) is loaded into the kernel.
+        Its arbitrary <strong>read/write IOCTL</strong> is used to locate and
+        <strong>zero EDR callback arrays</strong> (<code>PspCreateProcessNotifyRoutine</code>,
+        <code>PspLoadImageNotifyRoutine</code>, <code>ObRegisterCallbacks</code>)
+        inside <code>ntoskrnl.exe</code>.
+        The EDR is completely blind at <strong>Ring 0</strong>.
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:14px;">
+        <button class="btn btn-outline btn-sm" id="btnByovdStatus" title="Query driver + EDR callback state">
+          <i class="fa-solid fa-circle-info jki jki-sm"></i><span>Status</span>
+        </button>
+        <button class="btn btn-secondary btn-sm" id="btnByovdLoad" title="Load RTCore64.sys into kernel via SCM">
+          <i class="fa-solid fa-arrow-up-from-bracket jki jki-sm"></i><span>Load Driver</span>
+        </button>
+        <button class="btn btn-danger btn-sm" id="btnByovdDisable" title="Zero EDR kernel callbacks — EDR goes blind">
+          <i class="fa-solid fa-eye-slash jki jki-sm"></i><span>Disable EDR</span>
+        </button>
+        <button class="btn btn-outline btn-sm" id="btnByovdUnload" title="Unload driver + delete SCM service">
+          <i class="fa-solid fa-arrow-down-to-bracket jki jki-sm"></i><span>Unload Driver</span>
+        </button>
+      </div>
+
+      <button class="btn btn-outline btn-sm" id="btnByovdDrivers" style="width:100%;margin-bottom:14px;" title="Enumerate all loaded kernel drivers">
+        <i class="fa-solid fa-list jki jki-sm"></i><span>List All Kernel Drivers</span>
+      </button>
+
+      <!-- Live Log -->
+      <div style="font-size:0.62rem;color:var(--fg-dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">BYOVD Operation Log</div>
+      <div id="byovdLog" style="background:var(--terminal-bg);border:1px solid var(--border-med);border-radius:4px;padding:10px 14px;font-family:var(--font-mono);font-size:0.7rem;min-height:120px;max-height:200px;overflow-y:auto;color:#a1a1aa;line-height:1.7;">
+        <div style="color:var(--fg-dim);">[JOCKY BYOVD] Engine ready. Select a target and click an action.</div>
+      </div>
+
+      <!-- Driver Table -->
+      <div id="byovdDriversTable" style="display:none;margin-top:14px;">
+        <div style="font-size:0.62rem;color:var(--fg-dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">Loaded Kernel Drivers</div>
+        <div style="overflow-x:auto;max-height:200px;overflow-y:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:0.68rem;font-family:var(--font-mono);">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border-med);">
+                <th style="text-align:left;padding:4px 8px;color:var(--fg-dim);">#</th>
+                <th style="text-align:left;padding:4px 8px;color:var(--fg-dim);">Driver Name</th>
+                <th style="text-align:left;padding:4px 8px;color:var(--fg-dim);">Base Address</th>
+              </tr>
+            </thead>
+            <tbody id="byovdDriversBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" id="btnCloseByovd">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Automated Fleet Threat Hunter & Leak Isolation Modal -->
+<div class="modal-overlay hidden" id="modalAutoHunt">
+  <div class="modal modal-wide" style="max-width:920px;max-height:90vh;display:flex;flex-direction:column;">
+    <div class="modal-header" style="background:linear-gradient(135deg,rgba(14,246,204,0.08),rgba(0,201,255,0.08));border-bottom:1px solid var(--border-teal);">
+      <h2>
+        <i class="fa-solid fa-wand-magic-sparkles jki" style="color:var(--teal);"></i>
+        <span>Automated Fleet Threat Hunter &amp; Anomaly Correlation Engine</span>
+      </h2>
+      <button class="modal-close" id="closeModalAutoHunt"><i class="fa-solid fa-xmark jki"></i></button>
+    </div>
+    <div class="modal-body" style="overflow-y:auto;flex:1;padding:16px;">
+      
+      <!-- Top Fleet Telemetry Banner -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:10px;margin-bottom:16px;">
+        <div style="background:var(--bg-elevated);border:1px solid var(--border-med);border-radius:6px;padding:10px 14px;">
+          <div style="font-size:0.62rem;color:var(--fg-dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">Fleet Threat Level</div>
+          <div id="huntThreatLevel" style="font-size:1.05rem;font-weight:800;font-family:var(--font-mono);color:var(--danger);">ANALYZING...</div>
+        </div>
+        <div style="background:var(--bg-elevated);border:1px solid var(--border-med);border-radius:6px;padding:10px 14px;">
+          <div style="font-size:0.62rem;color:var(--fg-dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">Endpoints Scanned</div>
+          <div id="huntEndpointsCount" style="font-size:1.05rem;font-weight:800;font-family:var(--font-mono);color:var(--fg);">0</div>
+        </div>
+        <div style="background:var(--bg-elevated);border:1px solid var(--border-med);border-radius:6px;padding:10px 14px;">
+          <div style="font-size:0.62rem;color:var(--fg-dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">Artifacts Correlated</div>
+          <div id="huntArtifactsCount" style="font-size:1.05rem;font-weight:800;font-family:var(--font-mono);color:var(--teal);">0</div>
+        </div>
+        <div style="background:var(--bg-elevated);border:1px solid var(--border-med);border-radius:6px;padding:10px 14px;">
+          <div style="font-size:0.62rem;color:var(--fg-dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">Engine Engine Type</div>
+          <div style="font-size:0.75rem;font-weight:700;font-family:var(--font-mono);color:var(--amber);">Native Offline NLP &amp; Rule Correlation</div>
+        </div>
+      </div>
+
+      <!-- Top Suspect Card -->
+      <div id="huntSuspectCard" style="background:linear-gradient(135deg,rgba(239,68,68,0.08),rgba(245,158,11,0.08));border:1px solid rgba(239,68,68,0.4);border-radius:8px;padding:16px;margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+          <div>
+            <span style="font-size:0.65rem;background:rgba(239,68,68,0.2);color:#f87171;padding:2px 8px;border-radius:4px;font-weight:700;letter-spacing:0.05em;">PRIMARY LEAK SUSPECT ISOLATED</span>
+            <h3 id="huntSuspectName" style="margin:4px 0 0 0;font-size:1.15rem;color:#fca5a5;font-weight:700;">DESKTOP-SUSPECT-04 (192.168.1.105)</h3>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:0.65rem;color:var(--fg-dim);">ANOMALY RISK SCORE</div>
+            <div id="huntSuspectScore" style="font-size:1.6rem;font-weight:900;font-family:var(--font-mono);color:#ef4444;line-height:1;">99/100</div>
+          </div>
+        </div>
+
+        <!-- 5 Vector Breakdown Progress Bars -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(239,68,68,0.2);">
+          <div>
+            <div style="font-size:0.62rem;color:var(--fg-dim);display:flex;justify-content:space-between;"><span>USB Exfil</span><span id="scoreUsb">35/35</span></div>
+            <div style="height:4px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden;margin-top:3px;"><div id="barUsb" style="width:100%;height:100%;background:#ef4444;"></div></div>
+          </div>
+          <div>
+            <div style="font-size:0.62rem;color:var(--fg-dim);display:flex;justify-content:space-between;"><span>Suspicious Process</span><span id="scoreProc">25/25</span></div>
+            <div style="height:4px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden;margin-top:3px;"><div id="barProc" style="width:100%;height:100%;background:#f97316;"></div></div>
+          </div>
+          <div>
+            <div style="font-size:0.62rem;color:var(--fg-dim);display:flex;justify-content:space-between;"><span>Network Exfil</span><span id="scoreNet">20/20</span></div>
+            <div style="height:4px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden;margin-top:3px;"><div id="barNet" style="width:100%;height:100%;background:#eab308;"></div></div>
+          </div>
+          <div>
+            <div style="font-size:0.62rem;color:var(--fg-dim);display:flex;justify-content:space-between;"><span>Off-Hours Auth</span><span id="scoreAuth">15/15</span></div>
+            <div style="height:4px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden;margin-top:3px;"><div id="barAuth" style="width:100%;height:100%;background:#a855f7;"></div></div>
+          </div>
+          <div>
+            <div style="font-size:0.62rem;color:var(--fg-dim);display:flex;justify-content:space-between;"><span>File Staging</span><span id="scoreFile">15/15</span></div>
+            <div style="height:4px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden;margin-top:3px;"><div id="barFile" style="width:100%;height:100%;background:#06b6d4;"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Executive Verdict Narrative -->
+      <div style="background:var(--bg-elevated);border-left:3px solid var(--teal);padding:12px 14px;border-radius:4px;font-size:0.75rem;margin-bottom:16px;line-height:1.6;">
+        <div style="font-weight:700;color:var(--teal);margin-bottom:4px;display:flex;align-items:center;gap:6px;">
+          <i class="fa-solid fa-gavel"></i>
+          <span>Executive Forensic Verdict</span>
+        </div>
+        <div id="huntVerdictText" style="color:var(--fg-dim);">
+          Analyzing collected evidence across all fleet endpoints...
+        </div>
+      </div>
+
+      <!-- Smoking Gun Timeline -->
+      <div style="margin-bottom:16px;">
+        <div style="font-size:0.65rem;color:var(--fg-dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;font-weight:700;">
+          <i class="fa-solid fa-timeline" style="color:var(--amber);"></i> Incident Reconstruction Timeline ("Smoking Gun")
+        </div>
+        <div id="huntTimelineContainer" style="display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto;background:var(--terminal-bg);border:1px solid var(--border-med);border-radius:6px;padding:10px;">
+          <div style="color:var(--fg-muted);font-size:0.7rem;font-family:var(--font-mono);">No timeline events recorded yet.</div>
+        </div>
+      </div>
+
+      <!-- Fleet Ranking Table -->
+      <div>
+        <div style="font-size:0.65rem;color:var(--fg-dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;font-weight:700;">
+          <i class="fa-solid fa-list-ol" style="color:var(--teal);"></i> Complete Monitored Fleet Risk Rankings
+        </div>
+        <div style="overflow-x:auto;max-height:160px;overflow-y:auto;background:var(--terminal-bg);border:1px solid var(--border-med);border-radius:6px;">
+          <table style="width:100%;border-collapse:collapse;font-size:0.7rem;font-family:var(--font-mono);">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border-med);color:var(--fg-dim);text-align:left;">
+                <th style="padding:6px 10px;">Rank</th>
+                <th style="padding:6px 10px;">Endpoint / IP</th>
+                <th style="padding:6px 10px;">OS</th>
+                <th style="padding:6px 10px;">Risk Score</th>
+                <th style="padding:6px 10px;">Threat Status</th>
+                <th style="padding:6px 10px;">Key Indicators</th>
+              </tr>
+            </thead>
+            <tbody id="huntFleetTableBody">
+              <tr><td colspan="6" style="padding:10px;text-align:center;color:var(--fg-dim);">Loading fleet rankings...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer" style="display:flex;justify-content:space-between;">
+      <button class="btn btn-secondary btn-sm" id="btnHuntExportReport">
+        <i class="fa-solid fa-file-pdf jki jki-sm"></i>
+        <span>Generate Forensic PDF Report</span>
+      </button>
+      <button class="btn btn-outline btn-sm" id="btnCloseAutoHunt">Close</button>
     </div>
   </div>
 </div>

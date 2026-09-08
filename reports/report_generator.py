@@ -46,11 +46,12 @@ def make_styles():
     title_style = ParagraphStyle(
         'JockyTitle',
         parent       = base['Title'],
-        fontSize     = 22,
-        textColor    = DARK_BLUE,
-        spaceAfter   = 6,
+        fontSize     = 20,
+        textColor    = TEXT_WHITE,
+        spaceAfter   = 4,
         alignment    = TA_CENTER,
         fontName     = 'Helvetica-Bold',
+        leading      = 24,
     )
     subtitle_style = ParagraphStyle(
         'JockySubtitle',
@@ -174,8 +175,8 @@ def _cover_page(story, styles, case: dict, targets: list, ev_count: int):
 
     # Logo-like header block
     header_data = [[Paragraph(
-        '<b>JOCKY FORENSIC FRAMEWORK</b><br/>'
-        '<font size="10">Digital Forensic Investigation Report</font>',
+        '<font color="#FFFFFF"><b>JOCKY FORENSIC FRAMEWORK</b></font><br/>'
+        '<font size="10" color="#B0C4DE">Digital Forensic Investigation Report</font>',
         styles['title'])]]
     header_tbl = Table(header_data, colWidths=[17 * cm])
     header_tbl.setStyle(TableStyle([
