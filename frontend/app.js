@@ -1362,10 +1362,62 @@ function wireByovdModal() {
   if (r) r.addEventListener('click', byovdListDrivers);
 }
 
+// ── DRAGGABLE CENTER RESIZER (Split-Pane Resizing) ──────────────────────
+function wireCenterResizer() {
+  const resizer = $('centerResizer');
+  const termWrap = document.querySelector('.terminal-wrap');
+  const mainPanel = document.querySelector('.main-panel');
+  if (!resizer || !termWrap || !mainPanel) return;
+
+  let isDragging = false;
+  let startY = 0;
+  let startHeight = 0;
+
+  const onMouseDown = (e) => {
+    isDragging = true;
+    resizer.classList.add('is-dragging');
+    startY = e.clientY || (e.touches && e.touches[0].clientY);
+    startHeight = termWrap.getBoundingClientRect().height;
+    document.body.style.cursor = 'row-resize';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  };
+
+  const onMouseMove = (e) => {
+    if (!isDragging) return;
+    const currentY = e.clientY || (e.touches && e.touches[0].clientY);
+    const deltaY = currentY - startY;
+    const panelRect = mainPanel.getBoundingClientRect();
+    const minHeight = 120;
+    const maxHeight = panelRect.height - 120;
+    const newHeight = Math.max(minHeight, Math.min(maxHeight, startHeight + deltaY));
+
+    termWrap.style.flex = `0 0 ${newHeight}px`;
+    termWrap.style.maxHeight = 'none';
+  };
+
+  const onMouseUp = () => {
+    if (isDragging) {
+      isDragging = false;
+      resizer.classList.remove('is-dragging');
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    }
+  };
+
+  resizer.addEventListener('mousedown', onMouseDown);
+  resizer.addEventListener('touchstart', onMouseDown, { passive: false });
+  window.addEventListener('mousemove', onMouseMove);
+  window.addEventListener('touchmove', onMouseMove, { passive: false });
+  window.addEventListener('mouseup', onMouseUp);
+  window.addEventListener('touchend', onMouseUp);
+}
+
 // ── INIT ──────────────────────────────────────────────────────────────────
 async function initApp() {
   wireEvents();
   wireByovdModal();
+  wireCenterResizer();
   termLog('JOCKY Central Management Interface loaded', 'sys');
   termLog('Framework: JOCKY v1.0.0 — SIH 2026 Edition', 'sys');
   termLog('BYOVD Kernel Engine: RTCore64.sys ready', 'sys');
@@ -1381,3 +1433,4 @@ async function initApp() {
 window.addEventListener('DOMContentLoaded', () => {
   runLoader();
 });
+
