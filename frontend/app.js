@@ -471,6 +471,103 @@ function filterResultsTable(query) {
 }
 window.filterResultsTable = filterResultsTable;
 
+// ── HELPER: BUILD TABLE HTML ─────────────────────────────────────────────
+function buildTableHtml(rows, customId = '') {
+  if (!Array.isArray(rows) || rows.length === 0) {
+    return '<div class="empty-state" style="padding:10px 14px;">No structured tabular rows returned.</div>';
+  }
+
+  const allKeys = Object.keys(rows[0]);
+  let keys = [];
+  const knownProcessKeys = ['pid', 'name', 'status', 'cpu', 'mem_mb', 'user', 'exe', 'path', 'modified', 'size_kb', 'type', 'device', 'serial'];
+  if (knownProcessKeys.some(k => allKeys.includes(k))) {
+    keys = knownProcessKeys.filter(k => allKeys.includes(k));
+    allKeys.forEach(k => { if (!keys.includes(k) && keys.length < 8) keys.push(k); });
+  } else {
+    keys = allKeys.slice(0, 8);
+  }
+
+  const headerLabels = {
+    pid: 'PID',
+    name: 'NAME',
+    status: 'STATUS',
+    cpu: 'CPU',
+    mem_mb: 'MEM_MB',
+    user: 'USER',
+    exe: 'EXECUTABLE PATH',
+    ip: 'IP ADDRESS',
+    port: 'PORT',
+    proto: 'PROTO',
+    state: 'STATE',
+    path: 'PATH',
+    modified: 'MODIFIED',
+    size_kb: 'SIZE (KB)',
+    type: 'TYPE',
+    device: 'DEVICE',
+    serial: 'SERIAL',
+  };
+
+  const fid = customId ? `filter_${customId}` : 'tableFilterInput';
+  const cid = customId ? `count_${customId}` : 'tableRowCount';
+  const tid = customId ? `tbody_${customId}` : 'mainTableBody';
+
+  let html = `<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin:6px 0 8px 0;flex-wrap:wrap;">
+    <div style="position:relative;min-width:200px;max-width:300px;flex:1;">
+      <i class="fa-solid fa-magnifying-glass" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:0.70rem;color:var(--fg-muted);pointer-events:none;"></i>
+      <input type="text" id="${fid}" class="term-input" placeholder="Filter rows in realtime..." style="padding:4px 10px 4px 28px;height:28px;font-size:0.74rem;width:100%;border-radius:var(--r-sm);background:var(--bg-card);" oninput="filterScopedTable('${tid}', '${cid}', this.value)" />
+    </div>
+    <div id="${cid}" style="font-family:var(--font-mono);font-size:0.72rem;color:var(--fg-dim);">
+      Total: <strong>${rows.length}</strong> items
+    </div>
+  </div>`;
+
+  html += `<div class="proc-table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>${keys.map(k => `<th>${headerLabels[k.toLowerCase()] || k.toUpperCase()}</th>`).join('')}</tr>
+      </thead>
+      <tbody id="${tid}">
+        ${rows.slice(0, 300).map(row =>
+          `<tr>${keys.map(k => `<td>${formatCell(k, row[k])}</td>`).join('')}</tr>`
+        ).join('')}
+      </tbody>
+    </table>
+  </div>`;
+  if (rows.length > 300) {
+    html += `<div class="empty-state" style="margin-top:6px;">${rows.length - 300} more items &mdash; export JSON for full artifact data</div>`;
+  }
+  return html;
+}
+
+function filterScopedTable(tbodyId, countId, query) {
+  const q = (query || '').toLowerCase().trim();
+  const tbody = document.getElementById(tbodyId);
+  const countEl = document.getElementById(countId);
+  if (!tbody) return;
+  const rows = tbody.querySelectorAll('tr');
+  let visible = 0;
+  rows.forEach(tr => {
+    const text = tr.innerText.toLowerCase();
+    const match = !q || text.includes(q);
+    tr.style.display = match ? '' : 'none';
+    if (match) visible++;
+  });
+  if (countEl) {
+    countEl.innerHTML = q
+      ? `Filtered: <strong>${visible}</strong> of ${rows.length}`
+      : `Total: <strong>${rows.length}</strong> items`;
+  }
+}
+window.filterScopedTable = filterScopedTable;
+
+function openTargetView(ip) {
+  if (state.lastBulkData && state.lastBulkData.results && state.lastBulkData.results[ip]) {
+    const targetData = state.lastBulkData.results[ip];
+    renderResults(targetData, `${state.lastBulkCommand || 'Scan'} [${ip}]`);
+  }
+}
+window.openTargetView = openTargetView;
+
 // ── RESULTS RENDERER ──────────────────────────────────────────────────────
 function renderResults(data, command) {
   const body  = $('resultsBody');
@@ -485,6 +582,12 @@ function renderResults(data, command) {
   }
 
   let html = '';
+
+  // Store bulk state if bulk execution
+  if (data.results && typeof data.results === 'object' && !Array.isArray(data.results)) {
+    state.lastBulkData = data;
+    state.lastBulkCommand = command;
+  }
 
   // Stats row
   const stats = [];
@@ -513,77 +616,61 @@ function renderResults(data, command) {
     </div>`;
   }
 
-  // Table for common result types
-  const results = data.results || data.results;
+  // Table for common result types (single target)
+  const results = data.results;
   if (Array.isArray(results) && results.length > 0) {
-    const allKeys = Object.keys(results[0]);
-    // Logical column ordering if recognizable schema
-    let keys = [];
-    const knownProcessKeys = ['pid', 'name', 'status', 'cpu', 'mem_mb', 'user', 'exe'];
-    if (knownProcessKeys.some(k => allKeys.includes(k))) {
-      keys = knownProcessKeys.filter(k => allKeys.includes(k));
-      allKeys.forEach(k => { if (!keys.includes(k) && keys.length < 8) keys.push(k); });
-    } else {
-      keys = allKeys.slice(0, 8);
-    }
-
-    const headerLabels = {
-      pid: 'PID',
-      name: 'NAME',
-      status: 'STATUS',
-      cpu: 'CPU',
-      mem_mb: 'MEM_MB',
-      user: 'USER',
-      exe: 'EXECUTABLE PATH',
-      ip: 'IP ADDRESS',
-      port: 'PORT',
-      proto: 'PROTO',
-      state: 'STATE',
-    };
-
-    html += `<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin:6px 0 8px 0;flex-wrap:wrap;">
-      <div style="position:relative;min-width:220px;max-width:320px;flex:1;">
-        <i class="fa-solid fa-magnifying-glass" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:0.70rem;color:var(--fg-muted);pointer-events:none;"></i>
-        <input type="text" id="tableFilterInput" class="term-input" placeholder="Filter rows in realtime..." style="padding:4px 10px 4px 28px;height:30px;font-size:0.76rem;width:100%;border-radius:var(--r-sm);background:var(--bg-card);" oninput="filterResultsTable(this.value)" />
-      </div>
-      <div id="tableRowCount" style="font-family:var(--font-mono);font-size:0.74rem;color:var(--fg-dim);">
-        Total: <strong>${results.length}</strong> items
-      </div>
-    </div>`;
-
-    html += `<div class="proc-table-wrap">
-      <table class="data-table">
-        <thead>
-          <tr>${keys.map(k => `<th>${headerLabels[k.toLowerCase()] || k.toUpperCase()}</th>`).join('')}</tr>
-        </thead>
-        <tbody>
-          ${results.slice(0, 300).map(row =>
-            `<tr>${keys.map(k => `<td>${formatCell(k, row[k])}</td>`).join('')}</tr>`
-          ).join('')}
-        </tbody>
-      </table>
-    </div>`;
-    if (results.length > 300) {
-      html += `<div class="empty-state" style="margin-top:6px;">${results.length - 300} more items &mdash; export JSON for full artifact data</div>`;
-    }
+    html += buildTableHtml(results, 'single');
   }
 
-  // Bulk results (ip → data)
+  // Bulk results (multiple targets: ip → data)
   if (data.results && typeof data.results === 'object' && !Array.isArray(data.results)) {
-    html += '<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">';
-    Object.entries(data.results).forEach(([ip, res]) => {
-      html += `<div style="background:var(--bg-card);border:1px solid var(--border-amber);border-radius:var(--r-sm);padding:10px 14px">
-        <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--amber);margin-bottom:4px;font-weight:600;"><i class="fa-solid fa-network-wired jki jki-xs"></i> ${ip}</div>
-        <div style="font-family:var(--font-mono);font-size:0.72rem;color:var(--fg-dim)">
-          ${res.count !== undefined ? `${res.count} artifacts extracted` : (res.error || 'OK')}
-        </div>
-      </div>`;
+    html += '<div style="display:flex;flex-direction:column;gap:12px;margin-top:6px">';
+    
+    Object.entries(data.results).forEach(([ip, res], idx) => {
+      const isSuccess = Array.isArray(res.results) || res.count !== undefined;
+      const count = res.count !== undefined ? res.count : (Array.isArray(res.results) ? res.results.length : 0);
+      const safeId = ip.replace(/[^a-zA-Z0-9]/g, '_');
+
+      html += `<details open class="bulk-target-card" style="background:var(--bg-card);border:1px solid ${isSuccess ? 'var(--border-amber)' : 'var(--border-strong)'};border-radius:var(--r-md);padding:10px 14px;overflow:hidden;">
+        <summary style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;gap:10px;list-style:none;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <i class="fa-solid fa-desktop" style="color:${isSuccess ? 'var(--amber)' : 'var(--danger)'};font-size:0.85rem;"></i>
+            <span style="font-family:var(--font-mono);font-size:0.82rem;font-weight:700;color:var(--fg-base);">${ip}</span>
+            <span style="font-size:0.72rem;color:var(--fg-subtle);">${res.hostname ? `(${res.hostname})` : ''}</span>
+            <span class="badge" style="background:${isSuccess ? 'var(--success-dim)' : 'var(--danger-dim)'};color:${isSuccess ? 'var(--success)' : 'var(--danger)'};font-size:0.68rem;padding:2px 8px;border-radius:var(--r-full);">${isSuccess ? `${count} Artifacts` : 'Failed'}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            ${isSuccess ? `<button type="button" class="btn btn-outline btn-xs" onclick="event.stopPropagation(); openTargetView('${ip}')" style="font-size:0.70rem;padding:3px 8px;"><i class="fa-solid fa-expand"></i> Inspect Table</button>` : ''}
+            <i class="fa-solid fa-chevron-down" style="font-size:0.70rem;color:var(--fg-muted);"></i>
+          </div>
+        </summary>`;
+
+      if (res.evidence_hash) {
+        html += `<div class="evidence-hash-badge" style="margin:8px 0 6px 0;font-size:0.70rem;">
+          <span class="hash-tag">SHA-256</span>
+          <span style="font-family:var(--font-mono);font-size:0.68rem;">${res.evidence_hash}</span>
+        </div>`;
+      }
+
+      if (isSuccess && Array.isArray(res.results)) {
+        html += `<div style="margin-top:8px;">${buildTableHtml(res.results, `bulk_${safeId}`)}</div>`;
+      } else if (res.error) {
+        html += `<div style="background:var(--danger-dim);color:var(--danger);border:1px solid rgba(251,113,133,0.3);border-radius:var(--r-sm);padding:8px 12px;margin-top:8px;font-family:var(--font-mono);font-size:0.74rem;">
+          <i class="fa-solid fa-triangle-exclamation"></i> ${escapeHtml(res.error)}
+        </div>`;
+      } else {
+        const preview = JSON.stringify(res, null, 2).slice(0, 600);
+        html += `<div class="json-viewer" style="margin-top:8px;">${syntaxHighlight(preview)}</div>`;
+      }
+
+      html += `</details>`;
     });
+
     html += '</div>';
   }
 
   // JSON preview fallback
-  if (!html.includes('data-table') && !html.includes('fa-network-wired')) {
+  if (!html.includes('data-table') && !html.includes('bulk-target-card')) {
     const preview = JSON.stringify(data, null, 2).slice(0, 1200);
     html += `<div class="json-viewer" style="margin-top:10px;">${syntaxHighlight(preview)}</div>`;
   }
